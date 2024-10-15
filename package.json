@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "preinstall": "npm install",
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "lint": "eslint .",
