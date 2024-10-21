@@ -21,11 +21,14 @@ import * as Yup from "yup";
 type P = {
   isOpen: boolean;
   onClose: () => void;
+  onSignupSuccess: (message: string) => void;
 };
-export default function SigninModal({ isOpen, onClose }: P) {
+
+export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
   const [selectedKey, setSelectedKey] = useState("login");
   const [loading, setLoading] = useState(false);
   const { setUser, setIsLoggedIn } = useAuth();
+  const [showVerificationModal, setShowVerificationModal] = useState(false); // For verification modal
 
   const validationSchemas = {
     login: Yup.object().shape({
@@ -65,117 +68,120 @@ export default function SigninModal({ isOpen, onClose }: P) {
         login(values)
           .then((res) => {
             setUser(res?.user);
-            setIsLoggedIn(true);
-            setLoading(false);
+            setIsLoggedIn(true); // Set login state to true
             saveSession({
               accessToken: res?.access,
               refreshToken: res?.refresh,
             });
             setItem("user", res?.user);
-            toast.success(res?.message || "Please check your email");
-            onClose();
+            toast.success("Login successful");
+            onClose(); // Close modal on success
           })
           .catch((err) => {
-            console.log("wowowowoow", err);
-            toast.error(err?.message || "Something went wrong");
+            toast.error("Login failed. Please try again.");
             setLoading(false);
           });
       } else {
         register(values)
           .then(() => {
             setLoading(false);
-            toast.success("SignUp successfull");
-            onClose();
+            const successMessage ="";
+            setShowVerificationModal(true); // Show verification modal on success
+            onSignupSuccess(successMessage);
+            onClose(); // Close the signup modal
           })
           .catch((err) => {
-            toast.error(err?.message || "Something went wrong");
+            toast.error("Signup failed. Please try again.");
             setLoading(false);
           });
       }
     },
   });
+
   const { getFieldProps, handleSubmit, resetForm, errors, touched } = formik;
 
-  const handleTabChange = (key: Key) => {
-    setSelectedKey(key as string);
-  };
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={() => {
-        resetForm();
-        onClose();
-      }}
-      hideCloseButton
-    >
-      <ModalContent>
-        <ModalHeader>
-          <Tabs
-            fullWidth
-            aria-label="Options"
-            selectedKey={selectedKey}
-            onSelectionChange={handleTabChange}
-            color="primary"
-            radius="lg"
-            size="lg"
-          >
-            <Tab key="login" title="Login" className="text-lg py-6" />
-            <Tab key="signup" title="SignUp" className="text-lg py-6" />
-          </Tabs>
-        </ModalHeader>
-        <ModalBody>
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            {selectedKey === "signup" && (
+    <>
+      {/* Sign-in/Sign-up Modal */}
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          resetForm();
+        }}
+        hideCloseButton
+        className="backdrop-blur-sm"
+      >
+        <ModalContent>
+          <ModalHeader>
+            <Tabs
+              fullWidth
+              aria-label="Options"
+              selectedKey={selectedKey}
+              onSelectionChange={setSelectedKey as (key: Key) => void}
+              color="primary"
+              radius="lg"
+              size="lg"
+            >
+              <Tab key="login" title="Login" className="text-lg py-6" />
+              <Tab key="signup" title="Sign Up" className="text-lg py-6" />
+            </Tabs>
+          </ModalHeader>
+          <ModalBody>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+              {selectedKey === "signup" && (
+                <Input
+                  placeholder="Full Name"
+                  size="lg"
+                  {...getFieldProps("full_name")}
+                  isInvalid={touched.full_name && errors.full_name ? true : false}
+                  errorMessage={errors.full_name}
+                />
+              )}
               <Input
-                placeholder="Full Name"
+                placeholder="Email"
                 size="lg"
-                {...getFieldProps("full_name")}
-                isInvalid={touched.full_name && errors.full_name ? true : false}
-                errorMessage={errors.full_name}
+                {...getFieldProps("email")}
+                isInvalid={touched.email && errors.email ? true : false}
+                errorMessage={errors.email}
               />
-            )}
-            <Input
-              placeholder="Email"
-              size="lg"
-              {...getFieldProps("email")}
-              isInvalid={touched.email && errors.email ? true : false}
-              errorMessage={errors.email}
-            />
-            <Input
-              placeholder="Password"
-              size="lg"
-              {...getFieldProps("password")}
-              isInvalid={touched.password && errors.password ? true : false}
-              errorMessage={errors.password}
-            />
-            <Button size="lg" color="primary" type="submit" isLoading={loading}>
-              {selectedKey === "login" ? "Let's Go" : "Join Now"}
-            </Button>
-          </form>
-        </ModalBody>
-        <ModalFooter className="flex-col gap-4">
-          {selectedKey === "login" ? (
-            <p
-              className="mx-auto cursor-pointer"
-              onClick={() => setSelectedKey("signup")}
-            >
-              Don't have an account?
-              <span className="text-primary font-bold"> SigUp</span>
-            </p>
-          ) : (
-            <p
-              className="mx-auto cursor-pointer"
-              onClick={() => setSelectedKey("login")}
-            >
-              Already have an account!
-              <span className="text-primary font-bold"> Login</span>
-            </p>
-          )}
-          <Button size="lg" variant="bordered">
-            <FcGoogle className="h-6 w-6" /> Continue with Google
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+              <Input
+                placeholder="Password"
+                size="lg"
+                {...getFieldProps("password")}
+                isInvalid={touched.password && errors.password ? true : false}
+                errorMessage={errors.password}
+              />
+              <Button size="lg" color="primary" type="submit" isLoading={loading}>
+                {selectedKey === "login" ? "Let's Go" : "Join Now"}
+              </Button>
+            </form>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {/* Verification Modal */}
+      {showVerificationModal && (
+        <Modal
+          isOpen={showVerificationModal}
+          onClose={() => setShowVerificationModal(false)}
+          className="backdrop-blur-xl" // Stronger blur for verification
+          size="lg"
+        >
+          <ModalContent className="w-[80%] mx-auto p-8 rounded-lg shadow-lg">
+            <ModalHeader>
+              <h2 className="text-3xl font-bold">Verify your email address</h2>
+            </ModalHeader>
+            <ModalBody>
+              <p>Please click the button below to confirm your email address and activate your account.</p>
+            </ModalBody>
+            <ModalFooter>
+              <Button size="lg" color="primary" onClick={() => window.open("https://mail.google.com", "_blank")}>
+                Confirm Email
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
+    </>
   );
 }
