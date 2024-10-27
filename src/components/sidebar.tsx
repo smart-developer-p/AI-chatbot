@@ -61,7 +61,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
           ) : (
             <div className="p-4 flex flex-col gap-2 justify-between h-full">
               <div className="flex flex-col gap-2">
-                <ServicesSidebarBtn />
+{/*                 <ServicesSidebarBtn /> */}
                 <Button
                   radius="sm"
                   onClick={() => {
