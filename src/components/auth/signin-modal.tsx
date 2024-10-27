@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
-import { login, register } from "@/services/dispatch/user-dispatch";
+import { login, register, reverifyEmail } from "@/services/dispatch/user-dispatch";
 import { saveSession, setItem } from "@/services/session";
 import {
   Button,
@@ -28,7 +28,9 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setUser, setIsLoggedIn } = useAuth();
-  const [showVerificationModal, setShowVerificationModal] = useState(false); // For verification modal
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [resendingEmail, setResendingEmail] = useState(false);
 
   const validationSchemas = {
     login: Yup.object().shape({
@@ -52,6 +54,85 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
     }),
   };
 
+  const handleResendVerification = async () => {
+    if (!unverifiedEmail) return;
+    
+    setResendingEmail(true);
+    try {
+      await reverifyEmail({ email: unverifiedEmail });
+      toast.success("Verification email has been resent. Please check your inbox.");
+      setShowVerificationModal(true);
+    } catch (err) {
+      toast.error("Failed to resend verification email. Please try again.");
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+
+  // Enhanced error handling function
+  const handleApiError = (err: any, context: 'login' | 'signup') => {
+    setLoading(false);
+    
+    if (!err.response) {
+      setError("Network error. Please check your connection and try again.");
+      return;
+    }
+
+    const { status, data } = err.response;
+
+    // Handle email-specific error messages
+    if (data?.email?.[0]) {
+      const emailError = data.email[0];
+      
+      // Handle verified user case
+      if (emailError.includes("already exists and is verified")) {
+        setError("This email is already registered. Please login instead.");
+        setTimeout(() => setSelectedKey("login"), 1500);
+        return;
+      }
+      
+      // Handle unverified user case
+      if (emailError.includes("already registered but not verified")) {
+        setUnverifiedEmail(formik.values.email);
+        setError("This email is registered but not verified. Click below to resend verification email.");
+        return;
+      }
+
+      // Handle any other email-specific errors
+      setError(emailError);
+      return;
+    }
+
+    switch (status) {
+      case 400:
+        if (context === 'login' && data?.detail?.includes("not found")) {
+          setError("Email not registered. Please sign up first.");
+          setTimeout(() => setSelectedKey("signup"), 1500);
+          return;
+        }
+        setError(data.message || "Please check your input and try again.");
+        break;
+      case 401:
+        setError("Incorrect email or password. Please try again.");
+        break;
+      case 422:
+        setError("Invalid input format. Please check your details.");
+        break;
+      case 429:
+        setError("Too many attempts. Please try again later.");
+        break;
+      default:
+        setError("An unexpected error occurred. Please try again later.");
+    }
+
+    console.error("API Error:", {
+      status,
+      data,
+      context,
+      error: err
+    });
+  };
+
   const formik = useFormik({
     initialValues:
       selectedKey === "login"
@@ -62,78 +143,54 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
         ? validationSchemas.login
         : validationSchemas.signup,
     enableReinitialize: true,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       setLoading(true);
       setError(null);
 
-      const handleError = (err: any) => {
-        setLoading(false);
-        if (err.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          if (err.response.status === 400) {
-            setError(err.response.data.message || "Invalid input. Please check your details.");
-          } else if (err.response.status === 401) {
-            setError("Invalid credentials. Please try again.");
-          } else if (err.response.status === 409) {
-            setError("This email is already registered. Please login or use a different email.");
-          } else {
-            setError(`Server error: ${err.response.data.message || "An unexpected error occurred."}`);
-          }
-        } else if (err.request) {
-          // The request was made but no response was received
-          setError("No response from server. Please try again later.");
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          setError("An unexpected error occurred. Please try again.");
-        }
-        console.error("Error:", err);
-      };
-
-      if (selectedKey === "login") {
-        login(values)
-          .then((res) => {
-            setUser(res?.user);
-            setIsLoggedIn(true); // Set login state to true
+      try {
+        if (selectedKey === "login") {
+          const res = await login(values);
+          if (res?.user) {
+            setUser(res.user);
+            setIsLoggedIn(true);
             saveSession({
-              accessToken: res?.access,
-              refreshToken: res?.refresh,
+              accessToken: res.access,
+              refreshToken: res.refresh,
             });
-            setItem("user", res?.user);
+            setItem("user", res.user);
             toast.success("Login successful");
-            onClose(); // Close modal on success
-          })
-          .catch((err) => {
-            toast.error("Login failed. Please try again.");
-            setLoading(false);
-          });
-      } else {
-        register(values)
-          .then((res) => {
-            setLoading(false);
-            const successMessage ="";
-            setShowVerificationModal(true); // Show verification modal on success
-            onSignupSuccess(successMessage);
-            onClose(); // Close the signup modal
-          })
-          .catch((err) => {
-            toast.error("Signup failed. Please try again.");
-            setLoading(false);
-          });
+            onClose();
+          } else {
+            throw new Error("Invalid response format");
+          }
+        } else {
+          const res = await register(values);
+          setLoading(false);
+          setShowVerificationModal(true);
+          onSignupSuccess("Registration successful! Please verify your email.");
+          onClose();
+        }
+      } catch (err: any) {
+        handleApiError(err, selectedKey as 'login' | 'signup');
       }
     },
   });
 
   const { getFieldProps, handleSubmit, resetForm, errors, touched } = formik;
 
+  const handleClose = () => {
+    resetForm();
+    setError(null);
+    setUnverifiedEmail(null);
+    onClose();
+  };
+
   return (
     <>
       {/* Sign-in/Sign-up Modal */}
       <Modal
         isOpen={isOpen}
-        onClose={() => {
-          resetForm();
-        }}
+        onClose={handleClose}
         hideCloseButton
         className="backdrop-blur-sm"
       >
@@ -173,10 +230,24 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
               <Input
                 placeholder="Password"
                 size="lg"
+                type="password"
                 {...getFieldProps("password")}
                 isInvalid={touched.password && errors.password ? true : false}
                 errorMessage={errors.password}
               />
+              {error && (
+                <p className="text-danger text-sm font-medium px-2">{error}</p>
+              )}
+              {unverifiedEmail && (
+                <Button
+                  size="lg"
+                  color="secondary"
+                  onClick={handleResendVerification}
+                  isLoading={resendingEmail}
+                >
+                  Resend Verification Email
+                </Button>
+              )}
               <Button size="lg" color="primary" type="submit" isLoading={loading}>
                 {selectedKey === "login" ? "Let's Go" : "Join Now"}
               </Button>
@@ -190,7 +261,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
         <Modal
           isOpen={showVerificationModal}
           onClose={() => setShowVerificationModal(false)}
-          className="backdrop-blur-xl" // Stronger blur for verification
+          className="backdrop-blur-xl"
           size="lg"
         >
           <ModalContent className="w-[80%] mx-auto p-8 rounded-lg shadow-lg">
@@ -198,11 +269,11 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
               <h2 className="text-3xl font-bold">Verify your email address</h2>
             </ModalHeader>
             <ModalBody>
-              <p>Please click the button below to confirm your email address and activate your account.</p>
+              <p>Please check your email and click the verification link to activate your account.</p>
             </ModalBody>
             <ModalFooter>
               <Button size="lg" color="primary" onClick={() => window.open("https://mail.google.com", "_blank")}>
-                Confirm Email
+                Open Email
               </Button>
             </ModalFooter>
           </ModalContent>

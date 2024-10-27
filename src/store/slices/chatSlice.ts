@@ -5,6 +5,7 @@ export type Message = {
   role: "user" | "model";
   text: string;
   timestamp: string;
+  id: string;
 };
 
 export type Chat = {
@@ -14,6 +15,7 @@ export type Chat = {
   messages: Array<Message>;
   isError: boolean;
   errorMessage: string | null;
+  currentTypingMessageId: string | null;
 };
 
 const initialState: Chat = {
@@ -23,7 +25,9 @@ const initialState: Chat = {
   messages: [],
   isError: false,
   errorMessage: null,
+  currentTypingMessageId: null,
 };
+
 const chatSlice = createSlice({
   name: "chat",
   initialState: initialState,
@@ -32,19 +36,33 @@ const chatSlice = createSlice({
       return { ...state, messages: action.payload };
     },
     addBotMessage: (state, action) => {
-      const newMessages = [...state.messages, action.payload?.message];
+      const messageId = `msg-${Date.now()}`; // Generate a unique ID for the message
+      const newMessage = {
+        ...action.payload?.message,
+        id: messageId,
+      };
+      const newMessages = [...state.messages, newMessage];
+      
       return {
         ...state,
         messages: newMessages,
         botResponseLoading: false,
         chatId: action.payload?.conversation_id,
+        currentTypingMessageId: messageId, // Set this message as the currently typing one
       };
     },
     addUserMessage: (state, action) => {
-      state.messages.push(action.payload);
+      const messageId = `msg-${Date.now()}`;
+      state.messages.push({
+        ...action.payload,
+        id: messageId,
+      });
     },
     setBotResponseLoading: (state, action) => {
       return { ...state, botResponseLoading: action.payload };
+    },
+    setCurrentTypingMessageId: (state, action) => {
+      state.currentTypingMessageId = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -57,7 +75,12 @@ const chatSlice = createSlice({
         }
       })
       .addCase(getChatMessagesById.fulfilled, (state, action) => {
-        return { ...state, loading: false, messages: action?.payload };
+        // Add IDs to existing messages if they don't have them
+        const messagesWithIds = action.payload.map((msg: Message) => ({
+          ...msg,
+          id: msg.id || `msg-${Date.now()}-${Math.random()}`,
+        }));
+        return { ...state, loading: false, messages: messagesWithIds };
       })
       .addCase(getChatMessagesById.rejected, (state) => {
         return {
@@ -75,5 +98,6 @@ export const {
   addBotMessage,
   addUserMessage,
   setBotResponseLoading,
+  setCurrentTypingMessageId,
 } = chatSlice.actions;
 export default chatSlice.reducer;
