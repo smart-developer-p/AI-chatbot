@@ -22,9 +22,11 @@ type P = {
   isOpen: boolean;
   onClose: () => void;
 };
+
 export default function SigninModal({ isOpen, onClose }: P) {
-  const [selectedKey, setSelectedKey] = useState("login");
+  const [selectedKey, setSelectedKey] = useState<"login" | "signup">("login");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { setUser, setIsLoggedIn } = useAuth();
 
   const validationSchemas = {
@@ -61,6 +63,32 @@ export default function SigninModal({ isOpen, onClose }: P) {
     enableReinitialize: true,
     onSubmit: (values) => {
       setLoading(true);
+      setError(null);
+
+      const handleError = (err: any) => {
+        setLoading(false);
+        if (err.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          if (err.response.status === 400) {
+            setError(err.response.data.message || "Invalid input. Please check your details.");
+          } else if (err.response.status === 401) {
+            setError("Invalid credentials. Please try again.");
+          } else if (err.response.status === 409) {
+            setError("This email is already registered. Please login or use a different email.");
+          } else {
+            setError(`Server error: ${err.response.data.message || "An unexpected error occurred."}`);
+          }
+        } else if (err.request) {
+          // The request was made but no response was received
+          setError("No response from server. Please try again later.");
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          setError("An unexpected error occurred. Please try again.");
+        }
+        console.error("Error:", err);
+      };
+
       if (selectedKey === "login") {
         login(values)
           .then((res) => {
@@ -72,40 +100,40 @@ export default function SigninModal({ isOpen, onClose }: P) {
               refreshToken: res?.refresh,
             });
             setItem("user", res?.user);
-            toast.success(res?.message || "Please check your email");
+            toast.success(res?.message || "Login successful");
             onClose();
           })
-          .catch((err) => {
-            console.log("wowowowoow", err);
-            toast.error(err?.message || "Something went wrong");
-            setLoading(false);
-          });
+          .catch(handleError);
       } else {
         register(values)
-          .then(() => {
+          .then((res) => {
             setLoading(false);
-            toast.success("SignUp successfull");
+            toast.success(res?.message || "SignUp successful. Please check your email to verify your account.");
             onClose();
           })
-          .catch((err) => {
-            toast.error(err?.message || "Something went wrong");
-            setLoading(false);
-          });
+          .catch(handleError);
       }
     },
   });
+
   const { getFieldProps, handleSubmit, resetForm, errors, touched } = formik;
 
   const handleTabChange = (key: Key) => {
-    setSelectedKey(key as string);
+    setSelectedKey(key as "login" | "signup");
+    setError(null);
+    resetForm();
   };
+
+  const handleClose = () => {
+    resetForm();
+    setError(null);
+    onClose();
+  };
+
   return (
     <Modal
       isOpen={isOpen}
-      onClose={() => {
-        resetForm();
-        onClose();
-      }}
+      onClose={handleClose}
       hideCloseButton
     >
       <ModalContent>
@@ -124,6 +152,11 @@ export default function SigninModal({ isOpen, onClose }: P) {
           </Tabs>
         </ModalHeader>
         <ModalBody>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             {selectedKey === "signup" && (
               <Input
@@ -143,6 +176,7 @@ export default function SigninModal({ isOpen, onClose }: P) {
             />
             <Input
               placeholder="Password"
+              type="password"
               size="lg"
               {...getFieldProps("password")}
               isInvalid={touched.password && errors.password ? true : false}
@@ -157,15 +191,15 @@ export default function SigninModal({ isOpen, onClose }: P) {
           {selectedKey === "login" ? (
             <p
               className="mx-auto cursor-pointer"
-              onClick={() => setSelectedKey("signup")}
+              onClick={() => handleTabChange("signup")}
             >
               Don't have an account?
-              <span className="text-primary font-bold"> SigUp</span>
+              <span className="text-primary font-bold"> SignUp</span>
             </p>
           ) : (
             <p
               className="mx-auto cursor-pointer"
-              onClick={() => setSelectedKey("login")}
+              onClick={() => handleTabChange("login")}
             >
               Already have an account!
               <span className="text-primary font-bold"> Login</span>

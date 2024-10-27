@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function ActivateAccountPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("asdf");
+  const [error, setError] = useState("");
   const [searchParams] = useSearchParams();
   const uidb64 = searchParams.get("uidb64");
   const token = searchParams.get("token");
@@ -18,6 +18,12 @@ export default function ActivateAccountPage() {
   const navigate = useNavigate();
 
   const handleVerifyEmail = useCallback(() => {
+    if (!uidb64 || !token) {
+      setError("Missing uidb64 or token");
+      return;
+    }
+
+    setIsLoading(true);
     verifyEmail({ uidb64, token })
       .then((res) => {
         setIsLoading(false);
@@ -28,12 +34,10 @@ export default function ActivateAccountPage() {
           refreshToken: res?.refresh_token,
         });
         setItem("user", res?.user);
-        toast.success("Login successfull");
+        toast.success("Login successful");
         navigate("/");
       })
       .catch((error) => {
-        toast.error("Link is expired or something went wrong!");
-        setError("Link is expired or something went wrong!");
         setIsLoading(false);
         console.log(error);
       });
@@ -50,7 +54,7 @@ export default function ActivateAccountPage() {
       {isLoading ? (
         <div className="flex flex-col gap-4 items-center justify-center">
           <h1 className="md:text-3xl">
-            Please wait while acivating your account
+            Please wait while activating your account
           </h1>
           <CircularProgress size="lg" />
         </div>
@@ -66,7 +70,7 @@ export default function ActivateAccountPage() {
             <div className="flex flex-col gap-4 items-center justify-center">
               <FcApproval className="h-20 w-20 font-bold" />
               <h1 className="md:text-3xl">
-                Your account is acitvated successfully
+                Your account is activated successfully
               </h1>
             </div>
           )}

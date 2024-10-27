@@ -6,7 +6,7 @@ import PricingPage from "@/pages/pricing";
 import BlogPage from "@/pages/blog";
 import AboutPage from "@/pages/about";
 import ChatPage from "./pages/chat";
-import ActivateAccountPage from "./pages/activate-account";
+import ActivateAccountPage from "@/pages/activate-account";
 import ProfilePage from "./pages/profile";
 
 function App() {
