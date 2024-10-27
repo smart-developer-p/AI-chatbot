@@ -8,7 +8,9 @@ import { Button } from "@nextui-org/react";
 import { BiCopy, BiCheck } from "react-icons/bi";
 
 type P = {
-  message: Message;
+  message: Message & {
+    showTypingEffect?: boolean; // Add new optional property
+  };
 };
 
 const TypingIndicator = () => (
@@ -21,7 +23,7 @@ export default function BotMessage(props: P) {
   const { message } = props;
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [displayText, setDisplayText] = useState("");
-  const [isTyping, setIsTyping] = useState(true);
+  const [isTyping, setIsTyping] = useState(message.showTypingEffect ?? false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleCopy = (code: string) => {
@@ -34,6 +36,11 @@ export default function BotMessage(props: P) {
   const TextRenderer = ({ children }: { children: string }) => {
     if (!children) return null;
     
+    // Only show typing animation if showTypingEffect is true
+    if (!message.showTypingEffect) {
+      return <span>{message.text}</span>;
+    }
+    
     return (
       <span>
         {children}
@@ -43,6 +50,13 @@ export default function BotMessage(props: P) {
   };
 
   useEffect(() => {
+    // Only run typing effect if showTypingEffect is true
+    if (!message.showTypingEffect) {
+      setDisplayText(message.text);
+      setIsTyping(false);
+      return;
+    }
+
     if (currentIndex < message.text.length) {
       const timeout = setTimeout(() => {
         setDisplayText(prev => prev + message.text[currentIndex]);
@@ -53,7 +67,7 @@ export default function BotMessage(props: P) {
     } else {
       setIsTyping(false);
     }
-  }, [currentIndex, message.text]);
+  }, [currentIndex, message.text, message.showTypingEffect]);
 
   return (
     <div className="self-start flex items-start gap-2 markdown-content">

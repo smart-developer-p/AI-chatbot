@@ -15,7 +15,6 @@ import {
 import { useFormik } from "formik";
 import { Key, useState } from "react";
 import toast from "react-hot-toast";
-import { FcGoogle } from "react-icons/fc";
 import * as Yup from "yup";
 
 type P = {
