@@ -82,6 +82,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
                 scrollbarGutter: 'stable',
               }}
             >
+
               <ChatList />
             </div>
 
