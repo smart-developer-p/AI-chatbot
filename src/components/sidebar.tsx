@@ -1,15 +1,13 @@
-import { Button, Progress } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import { BsChatLeftDots } from "react-icons/bs";
 import { CiSettings } from "react-icons/ci";
 import ChatList from "./chats/chat-list";
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import ServicesSidebarBtn from "./services/services-sidebar-btn";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@/store/hooks";
 import { setMessages } from "@/store/slices/chatSlice";
 
-// Lazy load the SigninModal component
 const SigninModal = lazy(() => import("@/components/auth/signin-modal"));
 
 type P = {
@@ -20,15 +18,14 @@ type P = {
 export default function Sidebar({ isOpen, onClose }: P) {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [isSigninOpen, setIsSigninOpen] = useState(false);
-  const { loading, isLoggedIn } = useAuth(); // Fetch login state
+  const { loading, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  // Close the sidebar when clicked outside (for small screens)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        if (window.screen.width < 768) onClose();
+        if (window.innerWidth < 768) onClose();
       }
     }
 
@@ -44,73 +41,94 @@ export default function Sidebar({ isOpen, onClose }: P) {
   }, [isOpen, onClose]);
 
   return (
-    <>
-      <div className={`${isOpen ? "pl-4 py-4" : "p-0"}`}>
-        <div
-          ref={sidebarRef}
-          className={`z-50 h-full bg-background transition-all duration-200 ease-in-out ${
-            isSigninOpen || !isLoggedIn ? "blur" : "" // Apply blur only if modal is open or user is not logged in
-          } ${
-            isOpen
-              ? "w-52 min-w-52 max-w-52 md:min-w-80 md:w-80 md:max-w-80 visible "
-              : "w-0 invisible "
-          } overflow-x-hidden flex flex-col gap-4 rounded-md shadow-custom absolute top-0 left-0 sm:relative`}
-        >
-          {loading ? (
-            ""
-          ) : (
-            <div className="p-4 flex flex-col gap-2 justify-between h-full">
-              <div className="flex flex-col gap-2">
-{/*                 <ServicesSidebarBtn /> */}
-                <Button
-                  radius="sm"
-                  onClick={() => {
-                    navigate("/");
-                    dispatch(setMessages([]));
-                  }}
-                >
-                  <BsChatLeftDots className="h-6 w-6" /> New Chat
-                </Button>
-              </div>
-              {/* Chat list */}
-              <ChatList />
-
-              {/* If user is logged in, show plan upgrade; else, show login button */}
-              {isLoggedIn ? (
-                <>
-                  <Button radius="sm" color="primary" className="font-bold">
-                    Upgrade Plan
-                  </Button>
-                </>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  <Button
-                    radius="sm"
-                    color="primary"
-                    onClick={() => setIsSigninOpen(true)} // Open Sign-in modal
-                    className="font-bold"
-                  >
-                    Login / Sign Up
-                  </Button>
-                </div>
-              )}
-
-              <Button radius="sm" className="font-bold">
-                <CiSettings className="h-6 w-6" /> Settings
+    <div className={`${isOpen ? "pl-2 py-2" : "p-0"}`}>
+      <div
+        ref={sidebarRef}
+        className={`
+          fixed md:relative left-0 top-0 h-full
+          bg-background/80 backdrop-blur-md
+          transition-all duration-300 ease-in-out
+          ${isSigninOpen || !isLoggedIn ? "blur" : ""}
+          ${isOpen 
+            ? "w-64 min-w-64 max-w-64 md:min-w-72 md:w-72 md:max-w-72 visible" 
+            : "w-0 invisible"}
+          flex flex-col
+          border-r border-divider/50
+          shadow-lg rounded-r-xl
+        `}
+      >
+        {!loading && (
+          <div className="flex flex-col h-full">
+            {/* Top Section */}
+            <div className="p-3">
+              <Button
+                radius="lg"
+                className="justify-start gap-2 w-full h-12 bg-gradient-to-r from-primary/10 to-primary/20 hover:from-primary/20 hover:to-primary/30 transition-all duration-200"
+                onClick={() => {
+                  navigate("/");
+                  dispatch(setMessages([]));
+                }}
+              >
+                <BsChatLeftDots className="h-5 w-5 text-primary" />
+                <span className="font-medium">New Chat</span>
               </Button>
             </div>
-          )}
-        </div>
 
-        {/* Lazy load and show Sign-in Modal */}
-        <Suspense>
-          <SigninModal
-            isOpen={isSigninOpen}
-            onClose={() => setIsSigninOpen(false)} // Close modal when needed
-            onSignupSuccess={() => {}}
-          />
-        </Suspense>
+            {/* Chat List Section */}
+            <div 
+              className="flex-1 px-2 overflow-y-auto scrollbar-hide hover:scrollbar-default transition-all duration-300"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarGutter: 'stable',
+              }}
+            >
+
+              <ChatList />
+            </div>
+
+            {/* Bottom Section */}
+            <div className="p-3 border-t border-divider/50 flex flex-col gap-2.5 bg-background/50 backdrop-blur-sm">
+              {isLoggedIn ? (
+                <Button
+                  radius="lg"
+                  color="primary"
+                  className="justify-start w-full h-11 font-medium shadow-sm"
+                  variant="shadow"
+                >
+                  Upgrade to Pro
+                </Button>
+              ) : (
+                <Button
+                  radius="lg"
+                  color="primary"
+                  className="justify-start w-full h-11 font-medium shadow-sm"
+                  variant="shadow"
+                  onClick={() => setIsSigninOpen(true)}
+                >
+                  Login / Sign Up
+                </Button>
+              )}
+              
+              <Button
+                radius="lg"
+                variant="light"
+                className="justify-start gap-2 w-full h-11 text-default-600 hover:text-default-900"
+              >
+                <CiSettings className="h-5 w-5" />
+                Settings
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
-    </>
+
+      <Suspense>
+        <SigninModal
+          isOpen={isSigninOpen}
+          onClose={() => setIsSigninOpen(false)}
+          onSignupSuccess={() => {}}
+        />
+      </Suspense>
+    </div>
   );
 }

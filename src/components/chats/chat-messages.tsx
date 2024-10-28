@@ -1,59 +1,84 @@
 import { Chat } from "@/store/slices/chatSlice";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import BotMessage from "./bot-message";
 import UserMessage from "./user-message";
 import { Spacer } from "@nextui-org/react";
+
 type P = {
   data: Chat;
 };
+
 export default function ChatMessages(props: P) {
   const { data } = props;
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [data]);
+    if (bottomRef.current && !isFirstRender) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+    setIsFirstRender(false);
+  }, [data?.messages]);
 
-  // if (data?.loading) {
-  //   return <p>Loading...</p>;
-  // }
   return (
-    <div className="overflow-auto flex h-full flex-col ">
+    <div className="overflow-auto flex h-full flex-col">
       <Spacer y={24} />
-
-      <div className="w-full lg:w-4/5 flex flex-col mx-auto gap-6">
-        {/* Loading ui */}
+      <div className="w-full lg:w-4/5 flex flex-col mx-auto gap-6 px-4">
         {data?.loading ? (
-          <p>Loading...</p>
+          <div className="flex items-center justify-center p-4">
+            <p className="text-default-600">Loading messages...</p>
+          </div>
         ) : (
           <>
-            {/* Messages */}
             {data?.messages?.map((item) => {
               if (item.role === "model") {
-                return <BotMessage message={item} />;
+                return (
+                  <BotMessage
+                    key={item.id}
+                    message={item}
+                  />
+                );
               } else {
-                return <UserMessage message={item} />;
+                return (
+                  <UserMessage
+                    key={item.id}
+                    message={item}
+                  />
+                );
               }
             })}
-
-            {/* Bot loading ui */}
             {data?.botResponseLoading && (
-              <div className="bg-default w-fit px-2 rounded-lg text-left animate-pulse self-start">
-                <p>Analyzing...</p>
+              <div className="self-start flex items-start gap-4">
+                <img
+                  src="/logo.png"
+                  className="h-8 w-8 object-contain rounded-full flex-shrink-0"
+                  alt="cerina"
+                />
+                <div className="bg-default-100 px-4 py-2 rounded-lg text-left animate-pulse">
+                  <p className="text-default-600">Analyzing...</p>
+                </div>
               </div>
             )}
-
-            {/* Error ui */}
             {data?.isError && (
-              <div className="bg-default w-fit p-1 rounded-lg">
-                <p>{data?.errorMessage}</p>
+              <div className="self-start flex items-start gap-4">
+                <img
+                  src="/logo.png"
+                  className="h-8 w-8 object-contain rounded-full flex-shrink-0"
+                  alt="cerina"
+                />
+                <div className="bg-danger-100 px-4 py-2 rounded-lg">
+                  <p className="text-danger-600">
+                    {data?.errorMessage || "An error occurred. Please try again."}
+                  </p>
+                </div>
               </div>
             )}
           </>
         )}
       </div>
-
-      <Spacer y={10} ref={bottomRef} />
+      <div ref={bottomRef}>
+        <Spacer y={10} />
+      </div>
     </div>
   );
 }

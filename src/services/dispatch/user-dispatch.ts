@@ -19,7 +19,7 @@ export const verifyEmail = async (params: { uidb64: string; token: string }) => 
 };
 
 // ReVerify email
-export const reverifyEmail = async (params: { uidb64: string; token: string }) => {
+export const reverifyEmail = async (params: { email: string }) => {
   const { data } = await postService("/resend-verification/", params);
   return data;
 };

@@ -38,7 +38,7 @@ export default function Header(props: P) {
       <div className="flex items-center justify-between">
         <div className="flex gap-2 items-center">
           <Button isIconOnly onClick={toggleSideBar}>
-            <BsLayoutSidebar className="h-6 w-6" />
+            <BsLayoutSidebar className="h-4 w-4" />
           </Button>
           <Select selectedKeys={["cerina"]} className="w-32" variant="faded">
             <SelectItem key={"cerina"}>Cerina</SelectItem>
