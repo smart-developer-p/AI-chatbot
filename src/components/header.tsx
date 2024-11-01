@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 
 type P = {
   toggleSideBar: () => void;
+  isOpen:boolean
 };
 export default function Header(props: P) {
   const { toggleSideBar } = props;
@@ -34,11 +35,11 @@ export default function Header(props: P) {
     return null;
   }
   return (
-    <div className="absolute w-full px-4 pt-4 z-30">
+    <div className="absolute w-full px-2 pt-4 z-30 bg-background">
       <div className="flex items-center justify-between">
         <div className="flex gap-2 items-center">
-          <Button isIconOnly onClick={toggleSideBar}>
-            <BsLayoutSidebar className="h-4 w-4" />
+          <Button isIconOnly onClick={toggleSideBar} className={`${props.isOpen?'hidden':''}`} >
+            <BsLayoutSidebar className={`h-4 w-4  `} />
           </Button>
           <Select selectedKeys={["cerina"]} className="w-32" variant="faded">
             <SelectItem key={"cerina"}>Cerina</SelectItem>
