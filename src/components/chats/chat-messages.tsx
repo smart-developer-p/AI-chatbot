@@ -30,18 +30,18 @@ export default function ChatMessages(props: P) {
           </div>
         ) : (
           <>
-            {data?.messages?.map((item) => {
+            {data?.messages?.map((item, index) => {
               if (item.role === "model") {
                 return (
                   <BotMessage
-                    key={item.id}
+                    key={index}
                     message={item}
                   />
                 );
               } else {
                 return (
                   <UserMessage
-                    key={item.id}
+                    key={index}
                     message={item}
                   />
                 );

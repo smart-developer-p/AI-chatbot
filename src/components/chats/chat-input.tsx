@@ -54,6 +54,10 @@ export default function ChatInput() {
   };
 
   const sendMessage = () => {
+    console.log({
+      currentTypingMessageId,
+      botResponseLoading
+    })
     if(currentTypingMessageId||botResponseLoading){
       return
     }
