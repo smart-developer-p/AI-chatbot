@@ -1,4 +1,4 @@
-import { getService, postService } from "../service";
+import { deleteService, getService, postService } from "../service";
 
 // Start new chat
 export const newChat = async (param: unknown) => {
@@ -11,6 +11,11 @@ export const getChatMessages = async (conversationId: string) => {
   const { data } = await getService(`/chat/${conversationId}/`);
   return data;
 };
+
+export const deleteChatHistory= async(conversationId:string)=>{
+  const { data } = await deleteService(`/chat/delete/${conversationId}/`);
+  return data;
+}
 
 // Chat with existing conversation
 export const chatWithExistingConversation = async ({

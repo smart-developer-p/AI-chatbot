@@ -16,7 +16,7 @@ export default function DefaultLayout({
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="relative flex-1 overflow-hidden">
-        <Header toggleSideBar={() => setIsSidebarOpen((prev) => !prev)} />
+        <Header toggleSideBar={() => setIsSidebarOpen((prev) => !prev)} isOpen={isSidebarOpen} />
         <main className="overflow-hidden h-full">{children}</main>
       </div>
     </div>

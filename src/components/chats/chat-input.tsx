@@ -18,7 +18,7 @@ import { RiBook2Line } from "react-icons/ri";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 export default function ChatInput() {
-  const { botResponseLoading } = useAppSelector((state) => state.chat);
+  const { botResponseLoading ,currentTypingMessageId } = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
   const location = useLocation();
   const { id } = useParams();
@@ -54,6 +54,9 @@ export default function ChatInput() {
   };
 
   const sendMessage = () => {
+    if(currentTypingMessageId||botResponseLoading){
+      return
+    }
     dispatch(
       addUserMessage({
         role: "user",
@@ -150,7 +153,7 @@ export default function ChatInput() {
           <Button
             isIconOnly
             variant="light"
-            isDisabled={form.query.trim() === "" || botResponseLoading}
+            isDisabled={form.query.trim() === "" || !!currentTypingMessageId||botResponseLoading }
             onClick={sendMessage}
           >
             <IoMdSend className="h-6 w-6" />

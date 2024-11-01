@@ -41,7 +41,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
   }, [isOpen, onClose]);
 
   return (
-    <div className={`${isOpen ? "pl-2 py-2" : "p-0"}`}>
+    <div className={`p-0`}>
       <div
         ref={sidebarRef}
         className={`
@@ -52,20 +52,23 @@ export default function Sidebar({ isOpen, onClose }: P) {
           transition-all duration-300 ease-in-out
           ${isSigninOpen || !isLoggedIn ? "blur" : ""}
           ${isOpen 
-            ? "w-full  xs:w-1/2  md:w-72  visible" 
+            ? "w-64  md:w-72  visible" 
             : "w-0 invisible"}
           flex flex-col
-          border-r border-divider/50
-          shadow-lg rounded-r-xl
+          border-r border-divider/20
+          shadow-lg 
         `}
       >
         {!loading && (
           <div className="flex flex-col h-full">
             {/* Top Section */}
-            <div className="p-3 flex gap-2">
+            <div className="p-3 pt-4 flex gap-2">
+              <Button isIconOnly onClick={onClose} className=" h-11 w-14  aspect-square ">
+                  <BsLayoutSidebar className="h-4 w-4" />
+                </Button>
               <Button
                 radius="lg"
-                className="justify-start gap-2 w-full h-12 bg-gradient-to-r from-primary/10 to-primary/20 hover:from-primary/20 hover:to-primary/30 transition-all duration-200"
+                className="justify-start gap-2 w-full h-11 bg-gradient-to-r from-primary/10 to-primary/20 hover:from-primary/20 hover:to-primary/30 transition-all duration-200"
                 onClick={() => {
                   navigate("/");
                   dispatch(setMessages([]));
@@ -74,9 +77,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
                 <BsChatLeftDots className="h-5 w-5 text-primary" />
                 <span className="font-medium">New Chat</span>
               </Button>
-                <Button isIconOnly onClick={onClose} className="h-full w-auto   xs:hidden">
-                  <BsLayoutSidebar className="h-4 w-4" />
-                </Button>
+                
             </div>
 
             {/* Chat List Section */}
@@ -92,7 +93,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
             </div>
 
             {/* Bottom Section */}
-            <div className="p-3 border-t border-divider/50 flex flex-col gap-2.5 bg-background/50 backdrop-blur-sm">
+            <div className="p-3 border-t border-divider/20 flex flex-col gap-2.5 bg-background/50 backdrop-blur-sm">
               {isLoggedIn ? (
                 <Button
                   radius="lg"
