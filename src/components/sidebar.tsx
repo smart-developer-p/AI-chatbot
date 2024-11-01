@@ -1,5 +1,5 @@
 import { Button } from "@nextui-org/react";
-import { BsChatLeftDots } from "react-icons/bs";
+import { BsChatLeftDots,BsLayoutSidebar } from "react-icons/bs";
 import { CiSettings } from "react-icons/ci";
 import ChatList from "./chats/chat-list";
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
@@ -45,12 +45,14 @@ export default function Sidebar({ isOpen, onClose }: P) {
       <div
         ref={sidebarRef}
         className={`
+           z-50
+            overflow-hidden
           fixed md:relative left-0 top-0 h-full
           bg-background/80 backdrop-blur-md
           transition-all duration-300 ease-in-out
           ${isSigninOpen || !isLoggedIn ? "blur" : ""}
           ${isOpen 
-            ? "w-64 min-w-64 max-w-64 md:min-w-72 md:w-72 md:max-w-72 visible" 
+            ? "w-full  xs:w-1/2  md:w-72  visible" 
             : "w-0 invisible"}
           flex flex-col
           border-r border-divider/50
@@ -60,7 +62,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
         {!loading && (
           <div className="flex flex-col h-full">
             {/* Top Section */}
-            <div className="p-3">
+            <div className="p-3 flex gap-2">
               <Button
                 radius="lg"
                 className="justify-start gap-2 w-full h-12 bg-gradient-to-r from-primary/10 to-primary/20 hover:from-primary/20 hover:to-primary/30 transition-all duration-200"
@@ -72,6 +74,9 @@ export default function Sidebar({ isOpen, onClose }: P) {
                 <BsChatLeftDots className="h-5 w-5 text-primary" />
                 <span className="font-medium">New Chat</span>
               </Button>
+                <Button isIconOnly onClick={onClose} className="h-full w-auto   xs:hidden">
+                  <BsLayoutSidebar className="h-4 w-4" />
+                </Button>
             </div>
 
             {/* Chat List Section */}

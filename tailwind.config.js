@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '460px',  // Define custom breakpoint at 320px
+      },
       boxShadow: {
         custom: "1px 2px 20px 2px rgba(0, 0, 0, 0.35)",
       },

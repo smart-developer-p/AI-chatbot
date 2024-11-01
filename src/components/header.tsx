@@ -34,7 +34,7 @@ export default function Header(props: P) {
     return null;
   }
   return (
-    <div className="absolute w-full px-4 pt-4 z-50">
+    <div className="absolute w-full px-4 pt-4 z-30">
       <div className="flex items-center justify-between">
         <div className="flex gap-2 items-center">
           <Button isIconOnly onClick={toggleSideBar}>
