@@ -10,7 +10,6 @@ export default function ChatPage() {
   const { id } = useParams();
   const chatData = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
-
   useEffect(() => {
     dispatch(getChatMessagesById(id!));
   }, [dispatch, id]);

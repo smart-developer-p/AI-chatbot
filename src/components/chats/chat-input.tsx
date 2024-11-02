@@ -89,6 +89,7 @@ export default function ChatInput() {
   const handleExistingChat = (formdata: FormData) => {
     chatWithExistingConversation({ conversationId: id!, formdata })
       .then((res) => {
+        console.log(res)
         dispatch(
           addBotMessage({
             conversation_id: res?.conversation_id,
@@ -111,6 +112,7 @@ export default function ChatInput() {
   const handleNewChat = (formdata: FormData) => {
     newChat(formdata)
       .then((res) => {
+        console.log(res)
         dispatch(
           addBotMessage({
             conversation_id: res?.conversation_id,
@@ -147,6 +149,7 @@ export default function ChatInput() {
         <div className="flex flex-grow items-end gap-1 bg-default-100 rounded-md">
           <Textarea
             minRows={1}
+            autoFocus
             maxRows={9}
             placeholder="Press / Input"
             radius="sm"
