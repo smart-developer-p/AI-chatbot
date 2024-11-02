@@ -89,7 +89,7 @@ export default function ChatInput() {
   const handleExistingChat = (formdata: FormData) => {
     chatWithExistingConversation({ conversationId: id!, formdata })
       .then((res) => {
-        console.log(res)
+        console.log({text:res.model_response})
         dispatch(
           addBotMessage({
             conversation_id: res?.conversation_id,
@@ -112,7 +112,7 @@ export default function ChatInput() {
   const handleNewChat = (formdata: FormData) => {
     newChat(formdata)
       .then((res) => {
-        console.log(res)
+        console.log(res.model_response)
         dispatch(
           addBotMessage({
             conversation_id: res?.conversation_id,

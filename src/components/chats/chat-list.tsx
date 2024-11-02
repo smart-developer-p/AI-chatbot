@@ -63,7 +63,7 @@ export default function ChatList() {
 
               <Dropdown className="bg-background "  >
                 <DropdownTrigger>
-                  <Button isIconOnly variant="light" className=" right-0 sticky " onClick={e => {
+                  <Button isIconOnly variant="light" className=" right-0 sticky bg-transparent " onClick={e => {
                     e.stopPropagation()
                     // handleDelete(item?.conversation_id)
                   }} >
