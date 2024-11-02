@@ -1,6 +1,7 @@
 import { Message } from "@/store/slices/chatSlice";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useState, useEffect, useRef, memo } from "react";
@@ -130,7 +131,7 @@ export default function BotMessage(props: P) {
         <Markdown
           // key={'markdownstress'}
           className="leading-8"
-          remarkPlugins={[[remarkGfm, { singleTilde: false, }]]}
+          remarkPlugins={[[remarkGfm, { singleTilde: false, }],remarkBreaks]}
           components={{
             p({ children }) {
               return <TextRenderer>{children as string}</TextRenderer>;
