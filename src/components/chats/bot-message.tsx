@@ -27,10 +27,8 @@ export default function BotMessage(props: P) {
   const currentTypingMessageId = useSelector((state: any) => state.chat.currentTypingMessageId);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [displayText, setDisplayText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const [isCodeExpanded, setIsCodeExpanded] = useState(false);
-  const [isFullyTyped, setIsFullyTyped] = useState(false);
-
+  const [newMessage, setNewMessage] = useState<string>("");
   const isCurrentlyTyping = currentTypingMessageId === message.id;
 
   const handleCopy = (code: string) => {
@@ -39,46 +37,44 @@ export default function BotMessage(props: P) {
     setTimeout(() => setCopySuccess(null), 2000);
   };
 
-  useEffect(() => {
-    if (!message?.text) return;
-    
-    if (!isCurrentlyTyping) {
-      // If not the current typing message, show full text immediately
-      setDisplayText(message.text);
-      setIsTyping(false);
-      setIsFullyTyped(true);
-    } else {
-      // If current typing message, start typing effect
-      setDisplayText("");
-      setIsTyping(true);
-      setIsFullyTyped(false);
-      
-      let currentIndex = 0;
-      const text = message.text;
-      
-      const typingInterval = setInterval(() => {
-        if (currentIndex < text.length) {
-          setDisplayText(text.slice(0, currentIndex + 1));
-          currentIndex++;
-        } else {
-          clearInterval(typingInterval);
-          setIsTyping(false);
-          setIsFullyTyped(true);
-          dispatch(setCurrentTypingMessageId(null)); // Clear the typing message when done
-        }
-      }, 10);
+  const messageTyping = (text: string) => {
+    let currentIndex = 0;
+    const typingInterval = setInterval(() => {
+      if (currentIndex < text.length) {
+        setDisplayText(text.slice(0, currentIndex + 1));
+        currentIndex++;
+      } else {
+        dispatch(setCurrentTypingMessageId(null));
+        clearInterval(typingInterval);
+      }
+    }, 10);
+  }
 
-      return () => clearInterval(typingInterval);
+  useEffect(() => {
+    if (message.text !== newMessage) {
+      setNewMessage(message.text);
     }
-  }, [message?.text, isCurrentlyTyping, dispatch]);
+  }, [message?.text]);
+
+
+  useEffect(() => {
+    if (newMessage !== "") {
+      if (!isCurrentlyTyping) {
+        setDisplayText(newMessage);
+      } else {
+        setDisplayText("");
+        messageTyping(newMessage);
+      }
+    }
+  }, [newMessage])
 
   const TextRenderer = ({ children }: { children: string }) => {
     if (!children) return null;
-    
+
     return (
       <span>
         {children}
-        {isTyping && !isFullyTyped && <TypingIndicator />}
+        {isCurrentlyTyping && <TypingIndicator />}
       </span>
     );
   };
@@ -107,7 +103,7 @@ export default function BotMessage(props: P) {
               const match = /language-(\w+)/.exec(className || "");
               const language = match ? match[1] : "";
               const code = String(children).replace(/\n$/, "");
-              
+
               if (!match) {
                 return (
                   <code className="px-1.5 py-0.5 rounded-md bg-default-100 text-default-600" {...rest}>
@@ -118,7 +114,7 @@ export default function BotMessage(props: P) {
 
               const codeLines = code.split('\n').length;
               const shouldScroll = codeLines > 15;
-              
+
               return (
                 <div className="w-full my-4 overflow-hidden rounded-lg border border-default-200">
                   <div className="flex justify-between items-center bg-default-100 py-2 px-4">
@@ -132,8 +128,8 @@ export default function BotMessage(props: P) {
                     </div>
                     <div className="flex gap-2">
                       {shouldScroll && (
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="flat"
                           onClick={() => setIsCodeExpanded(!isCodeExpanded)}
                           className="bg-default-200 hover:bg-default-300"
@@ -141,8 +137,8 @@ export default function BotMessage(props: P) {
                           {isCodeExpanded ? 'Collapse' : 'Expand'}
                         </Button>
                       )}
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="flat"
                         onClick={() => handleCopy(code)}
                         className="bg-default-200 hover:bg-default-300"
@@ -161,7 +157,7 @@ export default function BotMessage(props: P) {
                       </Button>
                     </div>
                   </div>
-                  <div 
+                  <div
                     className="overflow-x-auto transition-all duration-300 ease-in-out"
                     style={{
                       maxHeight: isCodeExpanded ? 'none' : `${MAX_CODE_HEIGHT}px`,
@@ -184,7 +180,7 @@ export default function BotMessage(props: P) {
                     </SyntaxHighlighter>
                   </div>
                   {!isCodeExpanded && shouldScroll && (
-                    <div 
+                    <div
                       className="text-center py-2 bg-default-100 cursor-pointer hover:bg-default-200 transition-colors"
                       onClick={() => setIsCodeExpanded(true)}
                     >
