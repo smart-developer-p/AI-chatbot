@@ -3,7 +3,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { Button } from "@nextui-org/react";
 import { BiCopy, BiCheck } from "react-icons/bi";
 import { useSelector, useDispatch } from "react-redux";
@@ -11,6 +11,8 @@ import { setCurrentTypingMessageId } from "@/store/slices/chatSlice";
 
 type P = {
   message: Message;
+  onTyping?: Function;
+  parentHeight: number;
 };
 
 const TypingIndicator = () => (
@@ -21,8 +23,23 @@ const TypingIndicator = () => (
 
 const MAX_CODE_HEIGHT = 400;
 
+interface StressButtonProps {
+  expanded: boolean,
+  setExpanded:Function
+}
+
+const StressButton = memo(({ expanded,setExpanded }: StressButtonProps) => {
+  return <Button
+    size="sm"
+    onPointerDown={()=>setExpanded(!expanded) }
+    className="bg-default-200 hover:bg-default-300"
+  >
+    {expanded ? 'Collapse' : 'Expand'}
+  </Button>
+})
+
 export default function BotMessage(props: P) {
-  const { message } = props;
+  const { message, onTyping, parentHeight } = props;
   const dispatch = useDispatch();
   const currentTypingMessageId = useSelector((state: any) => state.chat.currentTypingMessageId);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
@@ -31,6 +48,8 @@ export default function BotMessage(props: P) {
   const [newMessage, setNewMessage] = useState<string>("");
   const isCurrentlyTyping = currentTypingMessageId === message.id;
 
+  const scrollLimited = useRef(false);
+  const scrollContinRef = useRef<HTMLDivElement>(null);
   const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopySuccess("Copied!");
@@ -41,13 +60,14 @@ export default function BotMessage(props: P) {
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
       if (currentIndex < text.length) {
-        setDisplayText(text.slice(0, currentIndex + 1));
-        currentIndex++;
+        setDisplayText(text.slice(0, currentIndex + 20));
+        currentIndex += 20;
       } else {
         dispatch(setCurrentTypingMessageId(null));
         clearInterval(typingInterval);
+        scrollLimited.current = false;
       }
-    }, 10);
+    }, 30);
   }
 
   useEffect(() => {
@@ -62,15 +82,23 @@ export default function BotMessage(props: P) {
       if (!isCurrentlyTyping) {
         setDisplayText(newMessage);
       } else {
+        scrollLimited.current = true;
         setDisplayText("");
         messageTyping(newMessage);
       }
     }
-  }, [newMessage])
+  }, [newMessage]);
+
+  useEffect(() => {
+    if (scrollContinRef.current) {
+      if (scrollContinRef.current?.clientHeight < (parentHeight - 150) || !scrollLimited.current) {
+        onTyping && onTyping()
+      }
+    }
+  }, [displayText])
 
   const TextRenderer = ({ children }: { children: string }) => {
     if (!children) return null;
-
     return (
       <span>
         {children}
@@ -78,6 +106,12 @@ export default function BotMessage(props: P) {
       </span>
     );
   };
+
+
+
+  useEffect(() => {
+    console.log(isCodeExpanded);
+  }, [isCodeExpanded])
 
   // Guard against undefined message
   if (!message?.text) {
@@ -91,10 +125,12 @@ export default function BotMessage(props: P) {
         className="h-8 w-8 object-contain rounded-full flex-shrink-0"
         alt="cerina"
       />
-      <div className="w-full max-w-full overflow-hidden">
+      <div className=" -translate-y-36" ></div>
+      <div className="w-full max-w-full overflow-hidden" ref={scrollContinRef}>
         <Markdown
+          // key={'markdownstress'}
           className="leading-8"
-          remarkPlugins={[[remarkGfm, { singleTilde: false }]]}
+          remarkPlugins={[[remarkGfm, { singleTilde: false, }]]}
           components={{
             p({ children }) {
               return <TextRenderer>{children as string}</TextRenderer>;
@@ -105,6 +141,7 @@ export default function BotMessage(props: P) {
               const code = String(children).replace(/\n$/, "");
 
               if (!match) {
+                // console.log('???')
                 return (
                   <code className="px-1.5 py-0.5 rounded-md bg-default-100 text-default-600" {...rest}>
                     {children}
@@ -128,14 +165,10 @@ export default function BotMessage(props: P) {
                     </div>
                     <div className="flex gap-2">
                       {shouldScroll && (
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          onClick={() => setIsCodeExpanded(!isCodeExpanded)}
-                          className="bg-default-200 hover:bg-default-300"
-                        >
-                          {isCodeExpanded ? 'Collapse' : 'Expand'}
-                        </Button>
+                        <>
+                          
+                          <StressButton expanded={isCodeExpanded} setExpanded={setIsCodeExpanded} />
+                        </>
                       )}
                       <Button
                         size="sm"
@@ -178,6 +211,7 @@ export default function BotMessage(props: P) {
                     >
                       {code}
                     </SyntaxHighlighter>
+
                   </div>
                   {!isCodeExpanded && shouldScroll && (
                     <div

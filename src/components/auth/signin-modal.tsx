@@ -178,19 +178,14 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
 
   const { getFieldProps, handleSubmit, resetForm, errors, touched } = formik;
 
-  const handleClose = () => {
-    resetForm();
-    setError(null);
-    setUnverifiedEmail(null);
-    onClose();
-  };
+
 
   return (
     <>
       {/* Sign-in/Sign-up Modal */}
       <Modal
         isOpen={isOpen}
-        onClose={handleClose}
+
         hideCloseButton
         className="backdrop-blur-sm"
       >
@@ -260,13 +255,13 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
       {showVerificationModal && (
         <Modal
           isOpen={showVerificationModal}
-          onClose={() => setShowVerificationModal(false)}
+          // onClose={() => setShowVerificationModal(false)}
           className="backdrop-blur-xl"
           size="lg"
         >
           <ModalContent className="w-[80%] mx-auto p-8 rounded-lg shadow-lg">
             <ModalHeader>
-              <h2 className="text-3xl font-bold">Verify your email address</h2>
+              <h2 className="text-3xl font-bold">Check Your Email</h2>
             </ModalHeader>
             <ModalBody>
               <p>Please check your email and click the verification link to activate your account.</p>
