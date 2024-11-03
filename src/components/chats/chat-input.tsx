@@ -75,7 +75,15 @@ export default function ChatInput() {
     formdata.append("query", form.query);
     formdata.append("file", form.file as Blob);
 
-    dispatch(setBotResponseLoading(true));
+
+    if(form.query.toLowerCase().startsWith('search')){
+
+      dispatch(setBotResponseLoading('Searching'));
+    }else{
+      dispatch(setBotResponseLoading('Analyzing'));
+
+    }
+
     if (location.pathname === "/") {
       handleNewChat(formdata);
     } else {
@@ -89,7 +97,7 @@ export default function ChatInput() {
   const handleExistingChat = (formdata: FormData) => {
     chatWithExistingConversation({ conversationId: id!, formdata })
       .then((res) => {
-        console.log({text:res.model_response})
+        console.log(res)
         dispatch(
           addBotMessage({
             conversation_id: res?.conversation_id,
@@ -100,11 +108,11 @@ export default function ChatInput() {
             },
           })
         );
-        dispatch(setBotResponseLoading(false));
+        dispatch(setBotResponseLoading(''));
       })
       .catch((err) => {
         console.log(err);
-        dispatch(setBotResponseLoading(false));
+        dispatch(setBotResponseLoading(''));
       });
   };
 
@@ -112,7 +120,7 @@ export default function ChatInput() {
   const handleNewChat = (formdata: FormData) => {
     newChat(formdata)
       .then((res) => {
-        console.log(res.model_response)
+        console.log(res)
         dispatch(
           addBotMessage({
             conversation_id: res?.conversation_id,
@@ -160,7 +168,7 @@ export default function ChatInput() {
           <Button
             isIconOnly
             variant="light"
-            isDisabled={form.query.trim() === "" || !!currentTypingMessageId||botResponseLoading }
+            isDisabled={form.query.trim() === "" || !!currentTypingMessageId||(!!botResponseLoading) }
             onClick={sendMessage}
           >
             <IoMdSend className="h-6 w-6" />

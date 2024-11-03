@@ -16,6 +16,8 @@ export default function ChatMessages(props: P) {
   const [isFirstRender, setIsFirstRender] = useState(true);
   const containRef = useRef<HTMLDivElement>(null);
   const scrollButton = useRef<HTMLButtonElement>(null);
+  
+  
 
   const handleScrollDwon = () => {
     if (containRef.current) {
@@ -26,6 +28,7 @@ export default function ChatMessages(props: P) {
       })
     }
   }
+
 
   useEffect(() => {
     if (!isFirstRender) {
@@ -88,6 +91,7 @@ export default function ChatMessages(props: P) {
                       key={index}
                       message={item}
                       parentHeight={containRef.current?.clientHeight || document.body.clientHeight}
+                      parent={containRef.current as HTMLDivElement}
                     />
                   );
                 } else {
@@ -107,7 +111,7 @@ export default function ChatMessages(props: P) {
                     alt="cerina"
                   />
                   <div className="bg-default-100 px-4 py-2 rounded-lg text-left animate-pulse">
-                    <p className="text-default-600">Analyzing...</p>
+                    <p className="text-default-600">{data?.botResponseLoading}...</p>
                   </div>
                 </div>
               )}

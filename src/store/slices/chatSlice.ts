@@ -11,7 +11,7 @@ export type Message = {
 export type Chat = {
   chatId?: string | null;
   loading: boolean;
-  botResponseLoading: boolean;
+  botResponseLoading: string;
   messages: Array<Message>;
   isError: boolean;
   errorMessage: string | null;
@@ -21,7 +21,7 @@ export type Chat = {
 const initialState: Chat = {
   chatId: null,
   loading: false,
-  botResponseLoading: false,
+  botResponseLoading: '',
   messages: [],
   isError: false,
   errorMessage: null,
@@ -46,7 +46,7 @@ const chatSlice = createSlice({
       return {
         ...state,
         messages: newMessages,
-        botResponseLoading: false,
+        botResponseLoading: '',
         chatId: action.payload?.conversation_id,
         currentTypingMessageId: messageId, // Set this message as the currently typing one
       };
