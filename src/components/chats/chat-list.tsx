@@ -59,16 +59,16 @@ export default function ChatList() {
             onClick={() => handleDivClick(`/c/${item?.conversation_id}`)}
           >
             <div className="flex items-center justify-between">
-              <p className="p-2">{item?.conversation_name || "Unknown"}</p>
+              <p className="p-2 w-full truncate">{item?.conversation_name || "Unknown"}</p>
 
               <Dropdown className="bg-background "  >
                 <DropdownTrigger>
-                  <Button isIconOnly variant="light" className=" right-0 sticky bg-transparent " onClick={e => {
+                  <span /* isIconOnly variant="light" */ className=" right-0 sticky p-2 opacity-50 hover:opacity-100 " onClick={e => {
                     e.stopPropagation()
                     // handleDelete(item?.conversation_id)
                   }} >
                     <BsThreeDots className="h-5 w-5 " />
-                  </Button>
+                  </span>
                 </DropdownTrigger>
                 <DropdownMenu variant="faded" aria-label="Static Actions" className="text-danger bg-background  "
                 
