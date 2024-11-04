@@ -8,7 +8,7 @@ import {
   addUserMessage,
   setBotResponseLoading,
 } from "@/store/slices/chatSlice";
-import { Button, Textarea } from "@nextui-org/react";
+import { Button, Popover, PopoverContent, PopoverTrigger, Textarea } from "@nextui-org/react";
 import moment from "moment";
 import { ChangeEvent, KeyboardEvent, useRef, useState } from "react";
 import { BsMic } from "react-icons/bs";
@@ -18,11 +18,14 @@ import { RiBook2Line } from "react-icons/ri";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 export default function ChatInput() {
-  const { botResponseLoading ,currentTypingMessageId } = useAppSelector((state) => state.chat);
+  const { botResponseLoading, currentTypingMessageId } = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
   const location = useLocation();
   const { id } = useParams();
   const navigate = useNavigate();
+
+
+  const [TooltipOpen,setTooltipOpen]=useState('')
 
   const [form, setForm] = useState({
     query: "",
@@ -58,7 +61,11 @@ export default function ChatInput() {
       currentTypingMessageId,
       botResponseLoading
     })
-    if(currentTypingMessageId||botResponseLoading){
+    if (currentTypingMessageId || botResponseLoading ) {
+      setTooltipOpen('Serina is typing, please wait')
+      return
+    }else if( form.query === ''){
+      setTooltipOpen('Please input text')
       return
     }
     dispatch(
@@ -76,10 +83,10 @@ export default function ChatInput() {
     formdata.append("file", form.file as Blob);
 
 
-    if(form.query.toLowerCase().startsWith('search')){
+    if (form.query.toLowerCase().startsWith('search')) {
 
       dispatch(setBotResponseLoading('Searching'));
-    }else{
+    } else {
       dispatch(setBotResponseLoading('Analyzing'));
 
     }
@@ -165,14 +172,24 @@ export default function ChatInput() {
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
           />
-          <Button
-            isIconOnly
-            variant="light"
-            isDisabled={form.query.trim() === "" || !!currentTypingMessageId||(!!botResponseLoading) }
-            onClick={sendMessage}
-          >
-            <IoMdSend className="h-6 w-6" />
-          </Button>
+       
+          <Popover onClose={()=>setTooltipOpen('')} placement='top-end' isOpen={(!!TooltipOpen)} >
+            <PopoverTrigger >
+            <Button
+              isIconOnly
+              variant="light"
+              // isDisabled={form.query.trim() === "" || !!currentTypingMessageId || (!!botResponseLoading)}
+              onClick={sendMessage}
+            >
+              <IoMdSend className="h-6 w-6" />
+            </Button>
+            </PopoverTrigger>
+            <PopoverContent  >
+              <div className="px-1 py-2">
+                {TooltipOpen}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <Button
           isIconOnly

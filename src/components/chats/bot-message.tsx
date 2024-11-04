@@ -18,12 +18,6 @@ type P = {
   parent:HTMLDivElement
 };
 
-// const TypingIndicator = () => (
-//   <span className="inline-flex ml-1 items-center">
-//     <span className="w-2 h-2 bg-primary rounded-full animate-ping" />
-//   </span>
-// );
-
 
 const MAX_CODE_HEIGHT = 400;
 
@@ -43,7 +37,7 @@ const StressButton = memo(({ expanded,setExpanded }: StressButtonProps) => {
 })
 
 export default function BotMessage(props: P) {
-  const { message, onTyping, parentHeight,parent } = props;
+  const { message, onTyping,parent } = props;
   const dispatch = useDispatch();
   const currentTypingMessageId = useSelector((state: any) => state.chat.currentTypingMessageId);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
@@ -52,6 +46,10 @@ export default function BotMessage(props: P) {
   const [newMessage, setNewMessage] = useState<string>("");
   const isCurrentlyTyping = currentTypingMessageId === message.id;
   const ContainerRef=useRef<HTMLDivElement>(null)
+  
+  const lastScrollY=useRef(0)
+  const ShouldScroll=useRef(true)
+
 
   const scrollLimited = useRef(false);
   const scrollContinRef = useRef<HTMLDivElement>(null);
@@ -65,14 +63,14 @@ export default function BotMessage(props: P) {
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
       if (currentIndex < text.length) {
-        setDisplayText(text.slice(0, currentIndex + 10));
-        currentIndex += 10;
+        setDisplayText(text.slice(0, currentIndex +5));
+        currentIndex += 5;
       } else {
         dispatch(setCurrentTypingMessageId(null));
         clearInterval(typingInterval);
         scrollLimited.current = false;
       }
-    }, 5);
+    }, 30);
   }
 
   useEffect(() => {
@@ -82,40 +80,10 @@ export default function BotMessage(props: P) {
   }, [message?.text]);
 
 
-  function asciiToHtmlTable(asciiTable:string) {
-    const lines = asciiTable.trim().split('\n');
-    
-    // Filter out separator lines and trim remaining lines
-    const dataLines = lines.filter(line => !line.startsWith('+') && line.trim() !== '').map(line => line.trim());
-    
-    // Extract headers (first row)
-    const headers = dataLines[0].split('|').filter(cell => cell.trim() !== '').map(cell => cell.trim());
-
-    const html = `
-<table border="1">
-  <thead>
-    <tr>
-      ${headers.map(header => `<th>${header}</th>`).join('\n      ')}
-    </tr>
-  </thead>
-  <tbody>
-    ${dataLines.slice(1).map(line => {
-        const rowData = line.split('|').filter(cell => cell.trim() !== '').map(cell => cell.trim());
-        return `<tr>
-      ${rowData.map(data => `<td>${data}</td>`).join('\n      ')}
-    </tr>`;
-    }).join('\n    ')}
-  </tbody>
-</table>`.trim();
-
-    return html;
-}
 
 
   useEffect(() => {
     if (newMessage !== "") {
-      console.log(newMessage)
-      console.log(asciiToHtmlTable(newMessage))
       if (!isCurrentlyTyping) {
         // Replace `\n` with two spaces for Markdown line breaks
         setDisplayText(newMessage.replace(/\\n/g, "  \n").replace(/\t/g, "    "));
@@ -128,33 +96,46 @@ export default function BotMessage(props: P) {
   }, [newMessage]);
 
   const isNearBottom=()=> {
+    // return true
     if (parent ) {
-    return parent.scrollHeight - parent.scrollTop - parent.clientHeight < 50&&parent.scrollHeight - parent.scrollTop - parent.clientHeight >20;
+    return /* parent.scrollHeight - parent.scrollTop - parent.clientHeight < 80 &&*/parent.scrollHeight - parent.scrollTop - parent.clientHeight >20;
   }else return false
   }
 
   useEffect(() => {
     if (scrollContinRef.current) {
-      if ((( scrollContinRef.current?.clientHeight < (parentHeight - 150)||scrollContinRef.current?.clientHeight > (parentHeight - 100)) && isNearBottom() ) || !scrollLimited.current) {
+      if ((( /* scrollContinRef.current?.clientHeight < (parentHeight - 150)||scrollContinRef.current?.clientHeight > (parentHeight - 100)|| */ShouldScroll.current) && isNearBottom() ) || !scrollLimited.current) {
         onTyping && onTyping()
       }
     }
+  
   }, [displayText])
 
-  // const TextRenderer = ({ children }: { children: string }) => {
-  //   if (!children) return null;
-  //   return (
-  //     <span>
-  //       {children}
-  //       {isCurrentlyTyping && <TypingIndicator />}
-  //     </span>
-  //   );
-  // };
 
+const onshoudscrollChange=(e:any)=>{
+  const currentScrollTop = e.target.scrollTop;
+
+if(currentScrollTop < lastScrollY.current){
+  ShouldScroll.current=false
+  
+}else if(parent.scrollHeight - parent.scrollTop - parent.clientHeight < 100) {
+  ShouldScroll.current=true
+}
+lastScrollY.current=e.target?.scrollTop
+}
+
+useEffect(()=>{
+  if(parent){
+    parent.addEventListener('scroll',onshoudscrollChange)
+  return ()=>{
+    parent.removeEventListener('scroll',onshoudscrollChange)
+  }
+  }
+  
+},[])
 
 
   useEffect(() => {
-    console.log(isCodeExpanded);
   }, [isCodeExpanded])
 
   // Guard against undefined message
@@ -188,7 +169,6 @@ export default function BotMessage(props: P) {
               const code = String(children).replace(/\n$/, "");
 
               if (!match) {
-                // console.log('???')
                 return (
                   <code className="px-1.5 py-0.5 rounded-md bg-default-100 text-default-600" {...rest}>
                     {children}
@@ -258,12 +238,12 @@ export default function BotMessage(props: P) {
                     >
                       {code}
                     </SyntaxHighlighter>
-
+                          {/* <div ref={codePannelBottomRef}  ></div> */}
                   </div>
                   {!isCodeExpanded && shouldScroll && (
                     <div
                       className="text-center py-2 bg-default-100 cursor-pointer hover:bg-default-200 transition-colors"
-                      onClick={() => setIsCodeExpanded(true)}
+                      onPointerDown={() => setIsCodeExpanded(true)}
                     >
                       <span className="text-sm text-default-600">Click to show more</span>
                     </div>
