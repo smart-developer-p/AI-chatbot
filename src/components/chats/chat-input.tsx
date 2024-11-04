@@ -62,7 +62,7 @@ export default function ChatInput() {
       botResponseLoading
     })
     if (currentTypingMessageId || botResponseLoading ) {
-      setTooltipOpen('Serina is typing, please wait')
+      setTooltipOpen('Cerina is typing, please wait')
       return
     }else if( form.query === ''){
       setTooltipOpen('Please input text')
@@ -83,7 +83,7 @@ export default function ChatInput() {
     formdata.append("file", form.file as Blob);
 
 
-    if (form.query.toLowerCase().startsWith('search')) {
+    if (form.query.toLowerCase().includes('search')) {
 
       dispatch(setBotResponseLoading('Searching'));
     } else {
