@@ -8,7 +8,7 @@ import {
   addUserMessage,
   setBotResponseLoading,
 } from "@/store/slices/chatSlice";
-import { Button, Popover, PopoverContent, PopoverTrigger, Textarea } from "@nextui-org/react";
+import { Button, Input, Popover, PopoverContent, PopoverTrigger, Tab, Tabs, Textarea } from "@nextui-org/react";
 import moment from "moment";
 import { ChangeEvent, KeyboardEvent, useRef, useState } from "react";
 import { BsMic } from "react-icons/bs";
@@ -16,6 +16,8 @@ import { IoMdSend } from "react-icons/io";
 import { MdOutlineAttachFile } from "react-icons/md";
 import { RiBook2Line } from "react-icons/ri";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import CustomModal from "../customModal";
+import { AiOutlineArrowRight, AiOutlinePlus } from "react-icons/ai";
 
 export default function ChatInput() {
   const { botResponseLoading, currentTypingMessageId } = useAppSelector((state) => state.chat);
@@ -23,6 +25,9 @@ export default function ChatInput() {
   const location = useLocation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [modalVisible,setModalVisible]=useState(false)
+
+  const [currentTab,setCurrentTab]=useState(1)
 
 
   const [TooltipOpen,setTooltipOpen]=useState('')
@@ -62,7 +67,7 @@ export default function ChatInput() {
       botResponseLoading
     })
     if (currentTypingMessageId || botResponseLoading ) {
-      setTooltipOpen('Serina is typing, please wait')
+      setTooltipOpen('Cerina is typing, please wait')
       return
     }else if( form.query === ''){
       setTooltipOpen('Please input text')
@@ -83,7 +88,7 @@ export default function ChatInput() {
     formdata.append("file", form.file as Blob);
 
 
-    if (form.query.toLowerCase().startsWith('search')) {
+    if (form.query.toLowerCase().includes('search')) {
 
       dispatch(setBotResponseLoading('Searching'));
     } else {
@@ -162,12 +167,21 @@ export default function ChatInput() {
           <BsMic className="h-6 w-6" />
         </Button>
         <div className="flex flex-grow items-end gap-1 bg-default-100 rounded-md">
+       
+          <Button
+          onClick={()=>setModalVisible(true)}
+          isIconOnly
+              variant="light"
+             className="p-0 w-2 rounded-r-none "
+            >
+              ^P
+            </Button>
           <Textarea
             minRows={1}
             autoFocus
             maxRows={9}
             placeholder="Press / Input"
-            radius="sm"
+            radius="none"
             value={form.query}
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
@@ -178,6 +192,7 @@ export default function ChatInput() {
             <Button
               isIconOnly
               variant="light"
+              className="rounded-l-none"
               // isDisabled={form.query.trim() === "" || !!currentTypingMessageId || (!!botResponseLoading)}
               onClick={sendMessage}
             >
@@ -199,6 +214,87 @@ export default function ChatInput() {
           <MdOutlineAttachFile className="h-6 w-6" />
         </Button>
       </div>
+      <CustomModal isOpen={modalVisible}  onClose={()=>setModalVisible(false)} >
+        <div className=" text-center">
+        <h2 className="text-2xl font-bold"> Prompt Library</h2>
+        Prompts are message templates that you can quickly fill in the chat input. Some prompts come with variables.
+        </div>
+        <Tabs 
+        aria-label="Options" 
+        color="primary" 
+        variant="underlined"
+        className="w-full px-8 "
+        onSelectionChange={(key)=> {
+          setCurrentTab(key as number)}}
+        classNames={{
+          tabList: "gap-6 w-full flex justify-between relative rounded-none p-0 border-b border-divider",
+          cursor: "w-full bg-[#3CFF00]",
+          tab: "max-w-fit px-8 h-12 w-1/2",
+          tabContent: "group-data-[selected=true]:text-[#3CFF00]"
+        }}
+      >
+        <Tab
+          key={1}
+          
+          title={
+            <div className="flex items-center space-x-2">
+              <span>Your Prompts</span>
+            </div>
+          }
+        />
+        <Tab
+        
+          key={2}
+          title={
+            <div className="flex items-center space-x-2">
+              <span>Community Prompts</span>
+            </div>
+          }
+        />
+        
+      </Tabs>
+      { currentTab==1? <div><div className="flex flex-grow gap-0 rounded-md items-center mt-6">
+        <Input placeholder="Search your Propts" autoFocus/>
+        <div className="flex whitespace-nowrap items-center px-2 text-sm" ><AiOutlinePlus/> Add Prompts</div>
+      </div>
+      <div className="flex flex-grow gap-0 rounded-md items-center mt-6">
+
+      <Input placeholder="Search your Propts"/>
+      </div>
+      <div className="flex flex-grow gap-0 rounded-md items-center mt-6">
+      <div className="p-4 border-dashed border-2 w-full text-center dark:border-gray-200 border-gray-800 ">You have no saved prompts. Tap “Add Prompt” to add new Prompts </div>
+      </div>      </div>:
+      <div>
+        <div className=" rounded-md items-center mt-6">
+        <Input placeholder="Search your Propts" autoFocus />
+        <div>
+
+         {[...Array(5)].map((v,i)=><div key={i} className="my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg flex gap-2 ">
+            <div>
+              <div className=" text-2xl font-bold">
+              Fix Grammar Errors
+              </div>
+              <div className="text-sm w-3/4  whitespace-break-spaces break-words">
+              Fix grammar errors in the text
+              Source: Tony Dinh
+              </div>
+            </div>
+            <div className="flex gap-1" >
+              <Button className="font-bold"    >
+                Use <AiOutlineArrowRight/>
+              </Button>
+              <Button className="font-bold">
+                Add <AiOutlinePlus/>
+              </Button>
+            </div>
+         </div>)}
+        </div>
+        </div>
+      </div>
+
+      }
+      
+      </CustomModal>
     </div>
   );
 }

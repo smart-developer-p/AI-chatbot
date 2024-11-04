@@ -137,7 +137,7 @@ export default function ChatMessages(props: P) {
         </div>
         <div className="relative p-2" ref={bottomRef}></div>
       </div>
-      <button ref={scrollButton} onClick={handleScrollDwon} className="absolute left-1/2 bottom-16 p-3 rounded-full bg-default "><AiOutlineArrowDown /></button>
+      <button ref={scrollButton} onClick={handleScrollDwon} className="absolute animate-bounce left-1/2 bottom-16 p-3 rounded-full bg-default "><AiOutlineArrowDown /></button>
     </>
   );
 }
