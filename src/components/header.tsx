@@ -65,7 +65,7 @@ export default function Header(props: P) {
                 >
                   Profile
                 </DropdownItem>
-                <DropdownItem key="settings">Settings</DropdownItem>
+                <DropdownItem key="settings" onClick={()=>navigate('/setting')} >Settings</DropdownItem>
                 <DropdownItem
                   key="edit"
                   onClick={handlelogout}

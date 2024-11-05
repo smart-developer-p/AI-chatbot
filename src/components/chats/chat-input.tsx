@@ -160,7 +160,7 @@ export default function ChatInput() {
           className="hidden"
           onChange={handleFileSelect}
         />
-        <Button isIconOnly variant="light">
+        <Button isIconOnly variant="light" onClick={()=>setModalVisible(true)}>
           <RiBook2Line className="h-6 w-6" />
         </Button>
         <Button isIconOnly variant="light">
@@ -168,20 +168,13 @@ export default function ChatInput() {
         </Button>
         <div className="flex flex-grow items-end gap-1 bg-default-100 rounded-md">
        
-          <Button
-          onClick={()=>setModalVisible(true)}
-          isIconOnly
-              variant="light"
-             className="p-0 w-2 rounded-r-none "
-            >
-              ^P
-            </Button>
+          
           <Textarea
             minRows={1}
             autoFocus
             maxRows={9}
             placeholder="Press / Input"
-            radius="none"
+            
             value={form.query}
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
@@ -254,22 +247,23 @@ export default function ChatInput() {
         
       </Tabs>
       { currentTab==1? <div><div className="flex flex-grow gap-0 rounded-md items-center mt-6">
-        <Input placeholder="Search your Propts" autoFocus/>
+        <Input placeholder="Search your Prompts" autoFocus/>
         <div className="flex whitespace-nowrap items-center px-2 text-sm" ><AiOutlinePlus/> Add Prompts</div>
       </div>
       <div className="flex flex-grow gap-0 rounded-md items-center mt-6">
 
-      <Input placeholder="Search your Propts"/>
+      <Input placeholder="Search your Propmts"/>
       </div>
       <div className="flex flex-grow gap-0 rounded-md items-center mt-6">
       <div className="p-4 border-dashed border-2 w-full text-center dark:border-gray-200 border-gray-800 ">You have no saved prompts. Tap “Add Prompt” to add new Prompts </div>
       </div>      </div>:
       <div>
         <div className=" rounded-md items-center mt-6">
-        <Input placeholder="Search your Propts" autoFocus />
+        <Input placeholder="Search your Prompts" autoFocus />
         <div>
 
-         {[...Array(5)].map((v,i)=><div key={i} className="my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg flex gap-2 ">
+         {[...Array(5)].map((v,i)=><div key={i} className="max-sm:block flex my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg  gap-2  justify-between ">
+
             <div>
               <div className=" text-2xl font-bold">
               Fix Grammar Errors
@@ -279,11 +273,11 @@ export default function ChatInput() {
               Source: Tony Dinh
               </div>
             </div>
-            <div className="flex gap-1" >
-              <Button className="font-bold"    >
+            <div className=" md:block   flex gap-1 mt-2" >
+              <Button className="font-bold m-1 "    >
                 Use <AiOutlineArrowRight/>
               </Button>
-              <Button className="font-bold">
+              <Button className="font-bold m-1">
                 Add <AiOutlinePlus/>
               </Button>
             </div>

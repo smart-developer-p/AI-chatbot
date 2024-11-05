@@ -86,11 +86,11 @@ export default function BotMessage(props: P) {
     if (newMessage !== "") {
       if (!isCurrentlyTyping) {
         // Replace `\n` with two spaces for Markdown line breaks
-        setDisplayText(newMessage.replace(/\\n/g, "  \n").replace(/\t/g, "    "));
+        setDisplayText(newMessage);
       } else {
         scrollLimited.current = true;
         setDisplayText("");
-        messageTyping(newMessage.replace(/\\n/g, "  \n").replace(/\t/g, "    "));
+        messageTyping(newMessage);
       }
     }
   }, [newMessage]);
