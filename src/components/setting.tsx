@@ -8,12 +8,17 @@ import {
   SelectItem,
   Switch,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
   Tabs,
 } from "@nextui-org/react";
 import {
   AiOutlineApi,
   AiOutlineClose,
-  AiOutlineProfile,
   AiOutlineSecurityScan,
 } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
@@ -21,9 +26,9 @@ import CustomModal from "./customModal";
 import { FiSettings } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { BiDesktop } from "react-icons/bi";
-import { CgClose } from "react-icons/cg";
 import { IoCloseCircleOutline } from "react-icons/io5";
-import { MdOutlinePhone, MdOutlinePhoneAndroid } from "react-icons/md";
+import { MdOutlinePhoneAndroid } from "react-icons/md";
+import { RenderCell } from "./renderApiKeyTableCell";
 
 const SettingModal = () => {
   const [createModal, setCreateModal] = useState(false);
@@ -31,10 +36,12 @@ const SettingModal = () => {
   const [isHorizontal, setHorizontalMode] = useState(false);
   const [SettingModal, setSettingModal] = useState(true);
 
+
+
   useEffect(() => {
     const resizeHandler = () => {
       if (
-        document.body.clientWidth  < 950
+        document.body.clientWidth < 950
       ) {
         setHorizontalMode(true);
       } else {
@@ -54,13 +61,13 @@ const SettingModal = () => {
     <div>
       <CustomModal
         isOpen={SettingModal}
-        width=" w-[90%] xl:w-[60%]  "
+        width=" w-[90%] xl:w-[80%]  "
         height="h-auto top-[20%]"
         onClose={() => navigate(-1)}
       >
         <div className="px-8 py-4 text-3xl flex justify-between">
           Settings&nbsp;
-          <AiOutlineClose onClick={()=>navigate(-1)} />
+          <AiOutlineClose onClick={() => navigate(-1)} />
         </div>
 
         <Divider />
@@ -168,26 +175,26 @@ const SettingModal = () => {
                   </div>
                 }
               >
-                 <div className=" max-xs:block  text-lg flex justify-between items-center w-full p-2">
+                <div className=" max-xs:block  text-lg flex justify-between items-center w-full p-2">
                   <div className="px-2">Log out of all devices</div>
                   <div>
                     <Button className="w-full">Log out all</Button>
                   </div>
                 </div>
-                <Divider/>
+                <Divider />
                 <div className=" block  text-lg  justify-between items-center w-full p-2">
                   <div className="p-2">Connected devices</div>
                   <div className=" max-h-80 overflow-auto " >
-                  {true?[...Array(10)].map((v,id)=><div key={id} className= "px-8 py-4 border-2 w-full text-center dark:border-gray-200 border-gray-800 rounded-md mt-2 max-sm:px-2 max-sm:block flex justify-between " >
-                    <div className=" whitespace-nowrap  flex justify-start items-center  truncate ... " >
-                      {id%3?<BiDesktop className="min-w-8 min-h-8"/>:<MdOutlinePhoneAndroid className="min-w-8 min-h-8"/>}&nbsp;
-                      9OWJDEEW0203WWKOPP
-                    </div>
-                    <div className= " whitespace-nowrap flex justify-end items-center">
-                      129.89.94.2 &nbsp;<IoCloseCircleOutline className=" opacity-80 hover:opacity-100 active:scale-85"  />
-                    </div>
-                  </div>)
-                  :<div className="p-4 border-dashed border-2 w-full text-center dark:border-gray-200 border-gray-800 ">There is no any connected device. </div>}
+                    {true ? [...Array(10)].map((v, id) => <div key={id} className="px-8 py-4 border-2 w-full text-center dark:border-gray-200 border-gray-800 rounded-md mt-2 max-sm:px-2 max-sm:block flex justify-between " >
+                      <div className=" whitespace-nowrap  flex justify-start items-center  truncate ... " >
+                        {id % 3 ? <BiDesktop className="min-w-8 min-h-8" /> : <MdOutlinePhoneAndroid className="min-w-8 min-h-8" />}&nbsp;
+                        9OWJDEEW0203WWKOPP
+                      </div>
+                      <div className=" whitespace-nowrap flex justify-end items-center">
+                        129.89.94.2 &nbsp;<IoCloseCircleOutline className=" opacity-80 hover:opacity-100 active:scale-85" />
+                      </div>
+                    </div>)
+                      : <div className="p-4 border-dashed border-2 w-full text-center dark:border-gray-200 border-gray-800 ">There is no any connected device. </div>}
                   </div>
                 </div>
               </Tab>
@@ -214,15 +221,85 @@ const SettingModal = () => {
                   consectetur. Amet bibendum amet in dui viverra malesuada
                   cursus quis.
                 </div>
-                New
-                <Input
-                  color="default"
-                  placeholder="new"
-                  classNames={{
-                    inputWrapper: "border-1",
-                  }}
-                />
-                <br />
+
+
+                <Divider className="my-3" />
+                <Table
+                isHeaderSticky
+                className="overflow-hidden"
+                classNames={{
+                  base: "max-h-[140px] overflow-scroll",
+                }} aria-label="Example table with custom cells">
+                  <TableHeader columns={[{
+                    uid: 'name', name: 'Name'
+                  }, {
+                    uid: 'key', name: 'API key'
+                  }, {
+                    uid: 'permission', name: 'Permissions'
+                  }, {
+                    uid: 'actions', name: 'Actions'
+                  }
+                  ]}>
+                    {(column) => (
+                      <TableColumn key={column?.uid} align={'center'}>
+                        {column.name}
+                      </TableColumn>
+                    )}
+                  </TableHeader>
+                  <TableBody items={[
+                    {
+                      id: 0,
+                      name: 'KSKKA',
+                      key: 's5e4155sd2a1d55wwww',
+                      permission: 'al'
+                    },
+                    {
+                      id: 1,
+                      name: 'KSKKA',
+                      key: 's5e4155sd2a1d55wwww',
+                      permission: 'al'
+                    },
+                    {
+                      id: 2,
+                      name: 'KSKKA',
+                      key: 's5e4155sd2a1d55wwww',
+                      permission: 'al'
+                    },
+                    {
+                      id: 3,
+                      name: 'KSKKA',
+                      key: 's5e4155sd2a1d55wwww',
+                      permission: 'al'
+                    },
+                    {
+                      id: 4,
+                      name: 'KSKKA',
+                      key: 's5e4155sd2a1d55wwww',
+                      permission: 'al'
+                    },
+                    {
+                      id: 5,
+                      name: 'KSKKA',
+                      key: 's5e4155sd2a1d55wwww',
+                      permission: 'al'
+                    }
+                  ]}>
+                    {(item) => (
+                      <TableRow key={item.id}>
+                        {(columnKey) => <TableCell>{RenderCell(item, columnKey)}</TableCell>}
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+
+
+
+                <Divider className="my-3" />
+                <div className=" font-semibold">
+
+                  New
+                </div>
+
                 Permissions
                 <br />
                 <Tabs color="success" radius="sm">
@@ -231,16 +308,28 @@ const SettingModal = () => {
                   <Tab key="readonly" title="Read Only" />
                 </Tabs>
                 <br />
-                <Button
-                  color="success"
-                  className="max-xs:w-full w-1/3 mt-4 float-end"
-                  onClick={() => {
-                    setSettingModal(false);
-                    setCreateModal(true);
-                  }}
-                >
-                  Create API Key
-                </Button>
+                <div className="max-xs:block flex" >
+                  <Input
+                    color="default"
+                    className=" mt-2"
+                    placeholder="New API key name"
+                    classNames={{
+                      inputWrapper: "border-1 rounded-r-none max-xs:rounded-lg",
+                    }}
+                  />
+                  <Button
+                    color="success"
+                    className="max-xs:w-full w-1/3 mt-2 float-end max-xs:rounded-lg rounded-l-none"
+                    onClick={() => {
+                      setSettingModal(false);
+                      setCreateModal(true);
+                    }}
+                  >
+                    Create API Key
+                  </Button>
+                </div>
+
+
               </Tab>
             </Tabs>
           </div>

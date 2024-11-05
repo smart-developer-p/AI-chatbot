@@ -100,6 +100,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
                   color="primary"
                   className="justify-start w-full h-11 font-medium shadow-sm"
                   variant="shadow"
+                  onClick={()=>navigate('/upgrade_plan')}
                 >
                   Upgrade to Pro
                 </Button>
