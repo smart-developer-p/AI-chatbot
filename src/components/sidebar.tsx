@@ -100,6 +100,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
                   color="primary"
                   className="justify-start w-full h-11 font-medium shadow-sm"
                   variant="shadow"
+                  onClick={()=>navigate('/upgrade_plan')}
                 >
                   Upgrade to Pro
                 </Button>
@@ -119,6 +120,7 @@ export default function Sidebar({ isOpen, onClose }: P) {
                 radius="lg"
                 variant="light"
                 className="justify-start gap-2 w-full h-11 text-default-600 hover:text-default-900"
+                onClick={()=>navigate('/setting')}
               >
                 <CiSettings className="h-5 w-5" />
                 Settings

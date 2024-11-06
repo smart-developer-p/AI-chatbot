@@ -9,6 +9,12 @@ export default {
   ],
   theme: {
     extend: {
+      keyframes: {
+        modal: {
+          'from': { transform: 'scale(1.2)',opacity:0 },
+          'to': { transform: 'scale(1)',opacity:1 },
+        }
+      },
       screens: {
         'xs': '460px',  // Define custom breakpoint at 320px
       },

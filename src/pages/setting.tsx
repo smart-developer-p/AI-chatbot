@@ -1,12 +1,12 @@
-import Profile from "@/components/user/profile";
+import SettingModal from "@/components/setting";
 import DefaultLayout from "@/layouts/default";
 
-export default function ProfilePage() {
+export default function Setting() {
   
   return (
     <DefaultLayout>
       <div >
-      <Profile />
+      <SettingModal/>
         </div>
     </DefaultLayout>
   );

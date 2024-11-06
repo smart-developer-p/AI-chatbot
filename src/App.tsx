@@ -8,6 +8,8 @@ import AboutPage from "@/pages/about";
 import ChatPage from "./pages/chat";
 import ActivateAccountPage from "@/pages/activate-account";
 import ProfilePage from "./pages/profile";
+import Setting from "./pages/setting";
+import Upgrade_Plan from "./pages/upgradepage";
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
       <Route element={<BlogPage />} path="/blog" />
       <Route element={<AboutPage />} path="/about" />
       <Route element={<ProfilePage />} path="/profile" />
+      <Route element={<Setting />} path="/setting" />
+      <Route element={<Upgrade_Plan />} path="/upgrade_plan" />
     </Routes>
   );
 }

@@ -12,7 +12,7 @@ export default function DefaultLayout({
   );
 
   return (
-    <div className="flex gap-2 h-[100dvh] relative">
+    <div className="flex gap-0 h-[100dvh] relative">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="relative flex-1 overflow-hidden">

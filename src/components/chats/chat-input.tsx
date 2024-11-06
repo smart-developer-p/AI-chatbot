@@ -8,14 +8,16 @@ import {
   addUserMessage,
   setBotResponseLoading,
 } from "@/store/slices/chatSlice";
-import { Button, Popover, PopoverContent, PopoverTrigger, Textarea } from "@nextui-org/react";
+import { Button, Input, Popover, PopoverContent, PopoverTrigger, Tab, Tabs, Textarea, Tooltip } from "@nextui-org/react";
 import moment from "moment";
-import { ChangeEvent, KeyboardEvent, useRef, useState } from "react";
+import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import { BsMic } from "react-icons/bs";
 import { IoMdSend } from "react-icons/io";
-import { MdOutlineAttachFile } from "react-icons/md";
+import { MdDeleteOutline, MdOutlineAttachFile } from "react-icons/md";
 import { RiBook2Line } from "react-icons/ri";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import CustomModal from "../customModal";
+import { AiOutlineArrowRight, AiOutlinePlus } from "react-icons/ai";
 
 export default function ChatInput() {
   const { botResponseLoading, currentTypingMessageId } = useAppSelector((state) => state.chat);
@@ -23,9 +25,12 @@ export default function ChatInput() {
   const location = useLocation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [modalVisible, setModalVisible] = useState(false)
+
+  const [currentTab, setCurrentTab] = useState(1)
 
 
-  const [TooltipOpen,setTooltipOpen]=useState('')
+  const [TooltipOpen, setTooltipOpen] = useState('')
 
   const [form, setForm] = useState({
     query: "",
@@ -61,10 +66,10 @@ export default function ChatInput() {
       currentTypingMessageId,
       botResponseLoading
     })
-    if (currentTypingMessageId || botResponseLoading ) {
+    if (currentTypingMessageId || botResponseLoading) {
       setTooltipOpen('Cerina is typing, please wait')
       return
-    }else if( form.query === ''){
+    } else if (form.query === '') {
       setTooltipOpen('Please input text')
       return
     }
@@ -146,6 +151,34 @@ export default function ChatInput() {
       });
   };
 
+
+  const [promptValue, setPromptValue] = useState('')
+  const [prompts, setPrompts] = useState<string[]>([])
+  const [promptSearchKey, setPromptSearchKey] = useState('')
+  const handlePromptAdd = () => {
+    if (prompts.includes(promptValue)) {
+      setPromptValue('')
+      return
+    }
+    setPrompts([promptValue, ...prompts])
+    setPromptValue('')
+    localStorage.setItem('prompts', JSON.stringify([promptValue, ...prompts]))
+  }
+  const handlePromptDelete = (value:string) => { 
+    const tt=prompts.filter(val=>val!==value)
+    setPrompts(tt)
+    localStorage.setItem('prompts',JSON.stringify(tt))
+   }
+
+  useEffect(() => {
+    const prompts = localStorage.getItem('prompts')
+
+    if (prompts) {
+      setPrompts(JSON.parse(prompts))
+    }
+
+  }, [])
+
   return (
     <div className="w-full px-4 pb-4">
       <div className="flex gap-1 items-end ">
@@ -155,34 +188,37 @@ export default function ChatInput() {
           className="hidden"
           onChange={handleFileSelect}
         />
-        <Button isIconOnly variant="light">
+        <Button isIconOnly variant="light" onClick={() => setModalVisible(true)}>
           <RiBook2Line className="h-6 w-6" />
         </Button>
         <Button isIconOnly variant="light">
           <BsMic className="h-6 w-6" />
         </Button>
         <div className="flex flex-grow items-end gap-1 bg-default-100 rounded-md">
+
+
           <Textarea
             minRows={1}
             autoFocus
             maxRows={9}
             placeholder="Press / Input"
-            radius="sm"
+
             value={form.query}
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
           />
-       
-          <Popover onClose={()=>setTooltipOpen('')} placement='top-end' isOpen={(!!TooltipOpen)} >
+
+          <Popover onClose={() => setTooltipOpen('')} placement='top-end' isOpen={(!!TooltipOpen)} >
             <PopoverTrigger >
-            <Button
-              isIconOnly
-              variant="light"
-              // isDisabled={form.query.trim() === "" || !!currentTypingMessageId || (!!botResponseLoading)}
-              onClick={sendMessage}
-            >
-              <IoMdSend className="h-6 w-6" />
-            </Button>
+              <Button
+                isIconOnly
+                variant="light"
+                className="rounded-l-none"
+                // isDisabled={form.query.trim() === "" || !!currentTypingMessageId || (!!botResponseLoading)}
+                onClick={sendMessage}
+              >
+                <IoMdSend className="h-6 w-6" />
+              </Button>
             </PopoverTrigger>
             <PopoverContent  >
               <div className="px-1 py-2">
@@ -199,6 +235,110 @@ export default function ChatInput() {
           <MdOutlineAttachFile className="h-6 w-6" />
         </Button>
       </div>
+      <CustomModal isOpen={modalVisible} height="max-h-[450px] top-1/4" onClose={() => setModalVisible(false)} >
+        <div className=" text-center">
+          <h2 className="text-2xl font-bold"> Prompt Library</h2>
+          Prompts are message templates that you can quickly fill in the chat input. Some prompts come with variables.
+        </div>
+        <Tabs
+          aria-label="Options"
+          color="primary"
+          variant="underlined"
+          className="w-full px-8 "
+          onSelectionChange={(key) => {
+            setCurrentTab(key as number)
+          }}
+          classNames={{
+            tabList: "gap-6 w-full flex justify-between relative rounded-none p-0 border-b border-divider",
+            cursor: "w-full bg-[#3CFF00]",
+            tab: "max-w-fit px-8 h-12 w-1/2",
+            tabContent: "group-data-[selected=true]:text-[#3CFF00]"
+          }}
+        >
+          <Tab
+            key={1}
+
+            title={
+              <div className="flex items-center space-x-2">
+                <span>Your Prompts</span>
+              </div>
+            }
+          />
+          <Tab
+
+            key={2}
+            title={
+              <div className="flex items-center space-x-2">
+                <span>Community Prompts</span>
+              </div>
+            }
+          />
+
+        </Tabs>
+        {currentTab == 1 ? <div>
+          <div className="flex flex-grow gap-0 rounded-md items-center mt-6">
+            <Input placeholder="Input new Prompts" value={promptValue} onChange={e => setPromptValue(e.target.value)} classNames={{
+              inputWrapper: 'bg-default focus:bg-default'
+            }} autoFocus color="default" />
+            <Button onClick={handlePromptAdd} className="flex whitespace-nowrap bg-transparent items-center px-2 text-sm" ><AiOutlinePlus /> Add Prompts</Button>
+          </div>
+          <div className="flex flex-grow gap-0 rounded-md items-center mt-6">
+
+            <Input placeholder="Search your Prompts" onChange={e => setPromptSearchKey(e.target.value)} classNames={{
+              inputWrapper: 'bg-default focus:bg-default'
+            }} />
+          </div>
+          <div className="flex flex-grow gap-0 rounded-md items-center mt-4">
+            {prompts.length ? <div className="w-full" >
+              {
+                prompts.filter(val=>val.toLocaleLowerCase().includes(promptSearchKey)).map((val: string, id) => <div key={id} className=" relative max-sm:block h-18 flex my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg  gap-2  justify-between ">
+                  <div className="w-[80%]  truncate " >{val}</div>
+                 
+                  <Tooltip showArrow placement='top-end' color='danger' content='Delete' className="capitalize">
+                  <div onClick={()=>handlePromptDelete(val)} >
+                        <MdDeleteOutline color="#FC506D" className="border-2  rounded-full p-1 w-6 h-6 border-danger-500  active:scale-85 hover:scale-105  " />
+                      </div>
+                  </Tooltip>
+
+                </div>)
+              }
+            </div> :
+              <div className="p-4 border-dashed border-2 w-full text-center dark:border-gray-200 border-gray-800 ">
+                You have no saved prompts. Tap “Add Prompt” to add new Prompts </div>}
+          </div>
+        </div> :
+          <div>
+            <div className=" rounded-md items-center mt-6">
+              <Input placeholder="Search your Prompts" autoFocus />
+              <div>
+
+                {[...Array(5)].map((v, i) => <div key={i} className="max-sm:block flex my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg  gap-2  justify-between ">
+
+                  <div>
+                    <div className=" text-2xl font-bold">
+                      Fix Grammar Errors
+                    </div>
+                    <div className="text-sm w-3/4  whitespace-break-spaces break-words">
+                      Fix grammar errors in the text
+                      Source: Tony Dinh
+                    </div>
+                  </div>
+                  <div className=" md:block   flex gap-1 mt-2" >
+                    <Button className="font-bold m-1 "    >
+                      Use <AiOutlineArrowRight />
+                    </Button>
+                    <Button className="font-bold m-1">
+                      Add <AiOutlinePlus />
+                    </Button>
+                  </div>
+                </div>)}
+              </div>
+            </div>
+          </div>
+
+        }
+
+      </CustomModal>
     </div>
   );
 }
