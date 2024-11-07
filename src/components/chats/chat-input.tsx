@@ -17,7 +17,8 @@ import { MdDeleteOutline, MdOutlineAttachFile } from "react-icons/md";
 import { RiBook2Line } from "react-icons/ri";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CustomModal from "../customModal";
-import { AiOutlineArrowRight, AiOutlinePlus } from "react-icons/ai";
+import { AiOutlineArrowRight, AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import { TiArrowRightOutline } from "react-icons/ti";
 
 export default function ChatInput() {
   const { botResponseLoading, currentTypingMessageId } = useAppSelector((state) => state.chat);
@@ -61,39 +62,40 @@ export default function ChatInput() {
     }
   };
 
-  const sendMessage = () => {
+
+  const sendMessage = (messageToSend: string = form.query) => {
     console.log({
       currentTypingMessageId,
       botResponseLoading
-    })
+    });
+
     if (currentTypingMessageId || botResponseLoading) {
-      setTooltipOpen('Cerina is typing, please wait')
-      return
-    } else if (form.query === '') {
-      setTooltipOpen('Please input text')
-      return
+      setTooltipOpen('Cerina is typing, please wait');
+      return;
+    } else if (messageToSend === '') {
+      setTooltipOpen('Please input text');
+      return;
     }
+
     dispatch(
       addUserMessage({
         role: "user",
-        text: form.query,
+        text: messageToSend,
         timestamp: moment().toISOString(),
       })
     );
+
     setForm({ query: "", file: null });
 
-    // call chat api here
+    // Call chat API here
     const formdata = new FormData();
-    formdata.append("query", form.query);
+    formdata.append("query", messageToSend);
     formdata.append("file", form.file as Blob);
 
-
-    if (form.query.toLowerCase().includes('search')) {
-
+    if (messageToSend.toLowerCase().includes('search')) {
       dispatch(setBotResponseLoading('Searching'));
     } else {
       dispatch(setBotResponseLoading('Analyzing'));
-
     }
 
     if (location.pathname === "/") {
@@ -155,20 +157,35 @@ export default function ChatInput() {
   const [promptValue, setPromptValue] = useState('')
   const [prompts, setPrompts] = useState<string[]>([])
   const [promptSearchKey, setPromptSearchKey] = useState('')
-  const handlePromptAdd = () => {
-    if (prompts.includes(promptValue)) {
+  const [Community_prompts, setCommunity_Prompts] = useState([
+    {
+      name: 'Fix grammar Error',
+      content: 'Fix grammar errors in the text. Source: Tony Dinh'
+    },
+    {
+      name: 'Fix grammar Error',
+      content: 'Fix grammar errors in the text. Source:Alpha Star'
+    },
+    {
+      name: 'Fix grammar Error',
+      content: 'Fix grammar errors in the text. Source:Ahammed Danish'
+    }
+  ])
+  const [Community_promptSearchKey, setCommunity_PromptSearchKey] = useState('')
+  const handlePromptAdd = (value:string=promptValue) => {
+    if (prompts.includes(value) || value === '') {
       setPromptValue('')
       return
     }
-    setPrompts([promptValue, ...prompts])
+    setPrompts([value, ...prompts])
     setPromptValue('')
-    localStorage.setItem('prompts', JSON.stringify([promptValue, ...prompts]))
+    localStorage.setItem('prompts', JSON.stringify([value, ...prompts]))
   }
-  const handlePromptDelete = (value:string) => { 
-    const tt=prompts.filter(val=>val!==value)
+  const handlePromptDelete = (value: string) => {
+    const tt = prompts.filter(val => val !== value)
     setPrompts(tt)
-    localStorage.setItem('prompts',JSON.stringify(tt))
-   }
+    localStorage.setItem('prompts', JSON.stringify(tt))
+  }
 
   useEffect(() => {
     const prompts = localStorage.getItem('prompts')
@@ -178,6 +195,20 @@ export default function ChatInput() {
     }
 
   }, [])
+
+  const handleUsePrompt = (value: string) => {
+    if (value) {
+      const newMessage = `I am sharing a prompt template with you! You need to act according to it.\n\n Here is the template.\n\n ${value}`;
+      setModalVisible(false);
+
+      // Update the form state and pass newMessage to sendMessage directly
+      setForm((prev) => ({
+        ...prev,
+        query: newMessage,
+      }));
+      sendMessage(newMessage);
+    }
+  };
 
   return (
     <div className="w-full px-4 pb-4">
@@ -215,7 +246,7 @@ export default function ChatInput() {
                 variant="light"
                 className="rounded-l-none"
                 // isDisabled={form.query.trim() === "" || !!currentTypingMessageId || (!!botResponseLoading)}
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
               >
                 <IoMdSend className="h-6 w-6" />
               </Button>
@@ -280,7 +311,7 @@ export default function ChatInput() {
             <Input placeholder="Input new Prompts" value={promptValue} onChange={e => setPromptValue(e.target.value)} classNames={{
               inputWrapper: 'bg-default focus:bg-default'
             }} autoFocus color="default" />
-            <Button onClick={handlePromptAdd} className="flex whitespace-nowrap bg-transparent items-center px-2 text-sm" ><AiOutlinePlus /> Add Prompts</Button>
+            <Button onClick={()=>handlePromptAdd()} className="flex whitespace-nowrap bg-transparent items-center px-2 text-sm" ><AiOutlinePlus /> Add Prompts</Button>
           </div>
           <div className="flex flex-grow gap-0 rounded-md items-center mt-6">
 
@@ -291,14 +322,22 @@ export default function ChatInput() {
           <div className="flex flex-grow gap-0 rounded-md items-center mt-4">
             {prompts.length ? <div className="w-full" >
               {
-                prompts.filter(val=>val.toLocaleLowerCase().includes(promptSearchKey)).map((val: string, id) => <div key={id} className=" relative max-sm:block h-18 flex my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg  gap-2  justify-between ">
+                prompts.filter(val => val.toLocaleLowerCase().includes(promptSearchKey)).map((val: string, id) => <div key={id} className=" relative max-sm:block h-18 flex my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg  gap-2  justify-between ">
                   <div className="w-[80%]  truncate " >{val}</div>
-                 
-                  <Tooltip showArrow placement='top-end' color='danger' content='Delete' className="capitalize">
-                  <div onClick={()=>handlePromptDelete(val)} >
+
+                  <div className="flex gap-2" >
+                    <Tooltip showArrow placement='top-end' color='success' content='Use' className="capitalize">
+                      <div onClick={() => handleUsePrompt(val)} >
+                        <TiArrowRightOutline color="#2EDB9A" className="border-2  rounded-full p-1 w-6 h-6 border-success-500  active:scale-85 hover:scale-105  " />
+                      </div>
+                    </Tooltip>
+                    <Tooltip showArrow placement='top-end' color='danger' content='Delete' className="capitalize">
+                      <div onClick={() => handlePromptDelete(val)} >
                         <MdDeleteOutline color="#FC506D" className="border-2  rounded-full p-1 w-6 h-6 border-danger-500  active:scale-85 hover:scale-105  " />
                       </div>
-                  </Tooltip>
+                    </Tooltip>
+                  </div>
+
 
                 </div>)
               }
@@ -309,29 +348,32 @@ export default function ChatInput() {
         </div> :
           <div>
             <div className=" rounded-md items-center mt-6">
-              <Input placeholder="Search your Prompts" autoFocus />
+              <Input placeholder="Search your Prompts" onChange={e => setCommunity_PromptSearchKey(e.target.value)} autoFocus />
               <div>
 
-                {[...Array(5)].map((v, i) => <div key={i} className="max-sm:block flex my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg  gap-2  justify-between ">
+                {Community_prompts
+                  .filter(value => value.content.toLocaleLowerCase().includes(Community_promptSearchKey))
+                  .map((v, i) => <div key={i} className="max-sm:block flex my-4 p-4 border-2 items-center border-gray-500 dark:border-white rounded-lg  gap-2  justify-between ">
 
-                  <div>
-                    <div className=" text-2xl font-bold">
-                      Fix Grammar Errors
+                    <div>
+                      <div className=" text-2xl font-bold">
+                        {v.name}
+                      </div>
+                      <div className="text-sm w-3/4  whitespace-break-spaces break-words">
+                        {v.content}
+                      </div>
                     </div>
-                    <div className="text-sm w-3/4  whitespace-break-spaces break-words">
-                      Fix grammar errors in the text
-                      Source: Tony Dinh
+                    <div className=" md:block   flex gap-1 mt-2" >
+                      <Button onClick={()=>handleUsePrompt(v.content)} className="font-bold m-1 "    >
+                        Use <AiOutlineArrowRight />
+                      </Button>
+                       { prompts.includes(v.content)?<Button onClick={()=>handlePromptDelete(v.content)} className="font-bold m-1">
+                        Added 
+                       </Button>:<Button onClick={()=>handlePromptAdd(v.content)} className="font-bold m-1">
+                        Add <AiOutlinePlus />
+                      </Button>}
                     </div>
-                  </div>
-                  <div className=" md:block   flex gap-1 mt-2" >
-                    <Button className="font-bold m-1 "    >
-                      Use <AiOutlineArrowRight />
-                    </Button>
-                    <Button className="font-bold m-1">
-                      Add <AiOutlinePlus />
-                    </Button>
-                  </div>
-                </div>)}
+                  </div>)}
               </div>
             </div>
           </div>

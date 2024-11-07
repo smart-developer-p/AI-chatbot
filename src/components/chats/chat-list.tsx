@@ -6,6 +6,7 @@ import { setMessages } from "@/store/slices/chatSlice";
 import { Dropdown, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, DropdownTrigger, DropdownMenu, DropdownItem, Button, Listbox, ListboxItem } from "@nextui-org/react";
 import { useState } from "react";
 import { BsThreeDots,BsTrash  } from "react-icons/bs";
+import { IoArchiveOutline, IoSaveOutline } from "react-icons/io5";
 import { useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -70,15 +71,33 @@ export default function ChatList() {
                     <BsThreeDots className="h-5 w-5 " />
                   </span>
                 </DropdownTrigger>
-                <DropdownMenu variant="faded" aria-label="Static Actions" className="text-danger bg-background  "
+                <DropdownMenu variant="faded" aria-label="Static Actions" className=" bg-background  "
                 
                 >
+                   <DropdownItem key="Archieve" onClick={() => {
+                    onOpen()
+                    selecteHistory(item.conversation_id)
+                  }} className="   text-center "   >
+                    <div className="flex w-full   items-center  pl-11   justify-start" >
+                    <IoArchiveOutline className="h-4 w-4    " /> &nbsp;Archieve
+
+                    </div>
+                  </DropdownItem>
+                  <DropdownItem key="Save" onClick={() => {
+                    onOpen()
+                    selecteHistory(item.conversation_id)
+                  }} className="   text-center "   >
+                    <div className="flex w-full  justify-start items-center  pl-11  " >
+                    <IoSaveOutline className="h-4 w-4    " /> &nbsp;Download
+
+                    </div>
+                  </DropdownItem>
 
                   <DropdownItem key="delete" onClick={() => {
                     onOpen()
                     selecteHistory(item.conversation_id)
                   }} className="text-danger bg-background   text-center " color="danger"  >
-                    <div className="flex w-full  justify-center items-center" >
+                    <div className="flex w-full  justify-start items-center  pl-11 " >
                     <BsTrash className="h-4 w-4    " /> &nbsp;Delete
 
                     </div>
