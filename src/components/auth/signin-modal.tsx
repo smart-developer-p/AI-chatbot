@@ -247,6 +247,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
                 <Input
                   placeholder="Full Name"
                   size="lg"
+                  type="text"
                   {...getFieldProps("full_name")}
                   isInvalid={touched.full_name && errors.full_name ? true : false}
                   errorMessage={errors.full_name}
@@ -255,6 +256,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
               <Input
                 placeholder="Email"
                 size="lg"
+                type="email"
                 {...getFieldProps("email")}
                 isInvalid={touched.email && errors.email ? true : false}
                 errorMessage={errors.email}
@@ -325,6 +327,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
           // onClose={() => setShowVerificationModal(false)}
           className="backdrop-blur-xl"
           size="lg"
+          // onClose={() => setShowVerificationModal(false)}
         >
           <ModalContent className="w-[80%] mx-auto p-8 rounded-lg shadow-lg">
             <ModalHeader>
@@ -343,9 +346,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
               <Button size="lg" color="primary" className="w-1/3 max-sm:w-full m-1" onClick={() => window.open("https://mail.google.com", "_blank")}>
                 Open Email
               </Button>
-              <Button size="lg" color="default" className="w-1/3 max-sm:w-full m-1" onClick={() => setShowVerificationModal(false)}>
-                Close
-              </Button>
+             
               </div>
             </ModalFooter>
           </ModalContent>
