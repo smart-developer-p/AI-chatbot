@@ -9,12 +9,14 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Progress,
   Tab,
   Tabs,
 } from "@nextui-org/react";
 import { useFormik } from "formik";
-import { Key, useState } from "react";
+import {  useState } from "react";
 import toast from "react-hot-toast";
+import { IoCheckmarkOutline, IoCloseOutline } from "react-icons/io5";
 import * as Yup from "yup";
 
 type P = {
@@ -32,10 +34,16 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [resendingEmail, setResendingEmail] = useState(false);
 
+  const [password, setPassword] = useState("")
+
   const validationSchemas = {
     login: Yup.object().shape({
       email: Yup.string()
         .email("Invalid email format")
+        .matches(
+          /@(gmail\.com|outlook\.com|mail\.com|yahoo\.com)$/,
+          "Invalid Email. Please Give a Valid Personal Email"
+        )
         .required("Email is required"),
       password: Yup.string()
         .min(3, "Password must be at least 3 characters long")
@@ -47,19 +55,23 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
         .required("Full name is required"),
       email: Yup.string()
         .email("Invalid email format")
+        .matches(
+          /@(gmail\.com|outlook\.com|mail\.com|yahoo\.com)$/,
+          "Invalid Email. Please Give a Valid Personal Email"
+        )
         .required("Email is required"),
-      password: Yup.string()
-        .min(3, "Password must be at least 3 characters long")
-        .required("Password is required"),
+      // password: Yup.string()
+      //   .min(3, "Password must be at least 3 characters long")
+      //   .required("Password is required"),
     }),
   };
 
-  const handleResendVerification = async () => {
-    if (!unverifiedEmail) return;
-    
+  const handleResendVerification = async (email:string=unverifiedEmail||'') => {
+    if (!email) return;
+
     setResendingEmail(true);
     try {
-      await reverifyEmail({ email: unverifiedEmail });
+      await reverifyEmail({ email });
       toast.success("Verification email has been resent. Please check your inbox.");
       setShowVerificationModal(true);
     } catch (err) {
@@ -72,7 +84,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
   // Enhanced error handling function
   const handleApiError = (err: any, context: 'login' | 'signup') => {
     setLoading(false);
-    
+
     if (!err.response) {
       setError("Network error. Please check your connection and try again.");
       return;
@@ -83,14 +95,14 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
     // Handle email-specific error messages
     if (data?.email?.[0]) {
       const emailError = data.email[0];
-      
+
       // Handle verified user case
       if (emailError.includes("already exists and is verified")) {
         setError("This email is already registered. Please login instead.");
         setTimeout(() => setSelectedKey("login"), 1500);
         return;
       }
-      
+
       // Handle unverified user case
       if (emailError.includes("already registered but not verified")) {
         setUnverifiedEmail(formik.values.email);
@@ -164,7 +176,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
             throw new Error("Invalid response format");
           }
         } else {
-          const res = await register(values);
+           await register(values);
           setLoading(false);
           setShowVerificationModal(true);
           onSignupSuccess("Registration successful! Please verify your email.");
@@ -176,7 +188,29 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
     },
   });
 
-  const { getFieldProps, handleSubmit, resetForm, errors, touched } = formik;
+  const { getFieldProps, handleSubmit, errors, touched } = formik;
+
+
+
+  function hasLetter() {
+    return /[a-zA-Z]/.test(password);
+  }
+
+  function hasNumber() {
+    return /[0-9]/.test(password);
+  }
+
+  function hasMinimumLength() {
+    return password.length >= 8;
+  }
+
+  function strongPassword() {
+    let sum = (hasLetter() ? 1 : 0) + (hasNumber() ? 1 : 0) + (hasMinimumLength() ? 1 : 0);
+
+    return 100 * (sum / 3)
+
+  }
+
 
 
 
@@ -195,7 +229,10 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
               fullWidth
               aria-label="Options"
               selectedKey={selectedKey}
-              onSelectionChange={setSelectedKey as (key: Key) => void}
+              onSelectionChange={(key)=>{
+                setSelectedKey(key as string )
+                setPassword('')
+              }  }
               color="primary"
               radius="lg"
               size="lg"
@@ -227,17 +264,47 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
                 size="lg"
                 type="password"
                 {...getFieldProps("password")}
+                onChange={e => {
+                  getFieldProps("password").onChange(e)
+                  setPassword(e.target.value)
+                }}
                 isInvalid={touched.password && errors.password ? true : false}
                 errorMessage={errors.password}
               />
+              
+              {selectedKey === 'signup' && <div className=" px-2" >
+                <div className="w-full flex justify-between" >
+                  <div className=" text-warning-500" >Weak</div>
+                  <div className=" text-success-500" >Strong</div>
+                </div>
+                <Progress
+                  size="sm"
+                  radius="sm"
+                  classNames={{
+                    base: "max-w-md",
+                    track: "drop-shadow-md border border-default",
+                    indicator: "bg-gradient-to-r from-yellow-500 via-orange-500 to-green-500",
+                    label: "tracking-wider font-medium text-default-600",
+                    value: "text-foreground/60",
+                  }}
+                  value={strongPassword()}
+                />
+                <div className={`flex items-center text-sm ${hasLetter() ? 'text-success-500' : 'text-danger-500'} `} >{hasLetter() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain at least one letter (lower or upper case)</div>
+                <div className={`flex items-center text-sm ${hasNumber() ? 'text-success-500' : 'text-danger-500'} `} >{hasNumber() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain at least one number</div>
+                <div className={`flex items-center text-sm ${hasMinimumLength() ? 'text-success-500' : 'text-danger-500'} `} >{hasMinimumLength() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain a minimum of 8 characters</div>
+
+              </div>}
               {error && (
                 <p className="text-danger text-sm font-medium px-2">{error}</p>
               )}
+
+
+
               {unverifiedEmail && (
                 <Button
                   size="lg"
                   color="secondary"
-                  onClick={handleResendVerification}
+                  onClick={()=> handleResendVerification()}
                   isLoading={resendingEmail}
                 >
                   Resend Verification Email
@@ -267,9 +334,19 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
               <p>Please check your email and click the verification link to activate your account.</p>
             </ModalBody>
             <ModalFooter>
-              <Button size="lg" color="primary" onClick={() => window.open("https://mail.google.com", "_blank")}>
+              <div className="w-full max-sm:block flex justify-between " >
+
+
+              <Button size="lg" color="warning" className="w-1/3 max-sm:w-full m-1" onClick={()=>handleResendVerification(formik.values['email'])}>
+                Resend 
+              </Button>
+              <Button size="lg" color="primary" className="w-1/3 max-sm:w-full m-1" onClick={() => window.open("https://mail.google.com", "_blank")}>
                 Open Email
               </Button>
+              <Button size="lg" color="default" className="w-1/3 max-sm:w-full m-1" onClick={() => setShowVerificationModal(false)}>
+                Close
+              </Button>
+              </div>
             </ModalFooter>
           </ModalContent>
         </Modal>

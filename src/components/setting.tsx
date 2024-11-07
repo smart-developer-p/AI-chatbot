@@ -21,7 +21,7 @@ import {
   AiOutlineClose,
   AiOutlineSecurityScan,
 } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CustomModal from "./customModal";
 import { FiSettings } from "react-icons/fi";
 import { useEffect, useState } from "react";
@@ -30,11 +30,18 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { MdOutlinePhoneAndroid } from "react-icons/md";
 import { RenderCell } from "./renderApiKeyTableCell";
 
+
+
 const SettingModal = () => {
   const [createModal, setCreateModal] = useState(false);
 
   const [isHorizontal, setHorizontalMode] = useState(false);
   const [SettingModal, setSettingModal] = useState(true);
+
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const id = queryParams.get('id');
 
 
 
@@ -76,6 +83,7 @@ const SettingModal = () => {
           <div className="flex w-full flex-col ">
             <Tabs
               aria-label="Options"
+              defaultSelectedKey={id||'General'}
               isVertical={!isHorizontal}
               classNames={{
                 tabList: "text-left  font-bold flex justify-center",
@@ -86,6 +94,7 @@ const SettingModal = () => {
             >
               <Tab
                 key="General"
+                
                 title={
                   <div className=" flex items-center">
                     <FiSettings className="w-6 h-6" />
