@@ -72,7 +72,7 @@ const SettingModal = () => {
         height="h-auto top-[20%]"
         onClose={() => navigate(-1)}
       >
-        <div className="px-8 py-4 text-3xl flex justify-between">
+        <div className="px-8 pb-4 text-3xl flex justify-between">
           Settings&nbsp;
           <AiOutlineClose onClick={() => navigate(-1)} />
         </div>
@@ -225,11 +225,45 @@ const SettingModal = () => {
                   <Radio value="you">You</Radio>
                   <Radio value="service">Service Account</Radio>
                 </RadioGroup>
-                <div className="text-sm py-4">
-                  Lorem ipsum dolor sit amet consectetur. Ac at et metus
-                  consectetur. Amet bibendum amet in dui viverra malesuada
-                  cursus quis.
+               
+
+
+
+                <Divider className="my-3" />
+                <div className=" font-semibold">
+
+                  New
                 </div>
+
+                Permissions
+                <br />
+                <Tabs color="success" radius="sm">
+                  <Tab key="all" title="All" />
+                  <Tab key="restricted" title="Restricted" />
+                  <Tab key="readonly" title="Read Only" />
+                </Tabs>
+                <br />
+                <div className="max-xs:block flex" >
+                  <Input
+                    color="default"
+                    className=" mt-2"
+                    placeholder="New API key name"
+                    classNames={{
+                      inputWrapper: "border-1 rounded-r-none max-xs:rounded-lg",
+                    }}
+                  />
+                  <Button
+                    color="success"
+                    className="max-xs:w-full w-1/3 mt-2 float-end max-xs:rounded-lg rounded-l-none"
+                    onClick={() => {
+                      setSettingModal(false);
+                      setCreateModal(true);
+                    }}
+                  >
+                    Create API Key
+                  </Button>
+                </div>
+                
 
 
                 <Divider className="my-3" />
@@ -300,45 +334,6 @@ const SettingModal = () => {
                     )}
                   </TableBody>
                 </Table>
-
-
-
-                <Divider className="my-3" />
-                <div className=" font-semibold">
-
-                  New
-                </div>
-
-                Permissions
-                <br />
-                <Tabs color="success" radius="sm">
-                  <Tab key="all" title="All" />
-                  <Tab key="restricted" title="Restricted" />
-                  <Tab key="readonly" title="Read Only" />
-                </Tabs>
-                <br />
-                <div className="max-xs:block flex" >
-                  <Input
-                    color="default"
-                    className=" mt-2"
-                    placeholder="New API key name"
-                    classNames={{
-                      inputWrapper: "border-1 rounded-r-none max-xs:rounded-lg",
-                    }}
-                  />
-                  <Button
-                    color="success"
-                    className="max-xs:w-full w-1/3 mt-2 float-end max-xs:rounded-lg rounded-l-none"
-                    onClick={() => {
-                      setSettingModal(false);
-                      setCreateModal(true);
-                    }}
-                  >
-                    Create API Key
-                  </Button>
-                </div>
-
-
               </Tab>
             </Tabs>
           </div>
