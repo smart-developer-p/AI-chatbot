@@ -1,4 +1,4 @@
-import { postService } from "../service";
+import { getService, postService, putService } from "../service";
 
 // Login
 export const login = async (params: unknown) => {
@@ -23,3 +23,19 @@ export const reverifyEmail = async (params: { email: string }) => {
   const { data } = await postService("/resend-verification/", params);
   return data;
 };
+
+export const updateProfile= async (params:{full_name:string,email:string})=>{
+  const {data}= await putService('/profile/',params)
+  return data
+}
+
+export const getConnectedDevices= async()=>{
+  const {data} = await getService('/devices/')
+  return data
+}
+
+export const logoutAllDevices = async ()=>{
+  const {data} =await postService('/logout-all/',{})
+  return data
+}
+

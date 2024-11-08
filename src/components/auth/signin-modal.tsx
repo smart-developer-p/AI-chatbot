@@ -157,6 +157,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
     enableReinitialize: true,
     onSubmit: async (values) => {
       setLoading(true);
+      
       setError(null);
 
       try {

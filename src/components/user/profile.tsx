@@ -4,35 +4,55 @@ import { Avatar, Divider, Switch } from "@nextui-org/react";
 import { AiOutlineUser } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
+import { updateProfile } from "@/services/dispatch/user-dispatch";
+import { useAuth } from "@/hooks/use-auth";
+import { getItem, setItem } from "@/services/session";
+import { convertToBase64 } from "@/utils";
+import toast from "react-hot-toast";
+import { User } from "@/contexts/AuthContext";
 
 const Profile = () => {
   //to-do: userdata fetching
+  const { user, setUser } = useAuth();
 
   const [UserInfo, setUserInfo] = useState({
-    avatar: "/images/avatar.png",
-    name: "Alpha Star",
-    email: "alpha_star@gmail.com",
+    avatar: getItem('avatar') || '',
+    full_name: user?.full_name || '',
+    email: user?.email || '',
     retention: true,
   });
+
+  const save = async () => {
+    const result = await updateProfile({ full_name: UserInfo.full_name, email: UserInfo.email })
+    if(result.message  !=="No changes were made to the profile"){
+      toast.success(result.message)
+      setUser({...user,full_name:UserInfo.full_name,email:UserInfo.email} as User )
+      setItem("user", {...user,full_name:UserInfo.full_name,email:UserInfo.email} as User);
+    }
+  }
 
   const [isNameChanging, setIsnameChaning] = useState(false);
   const [isEmailChanging, setIsEmailChanging] = useState(false);
 
-  const [file, setFile] = useState<File>();
 
   const FileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSeleteFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target?.files) {
-      setFile(e.target.files[0]);
-      setUserInfo({
-        ...UserInfo,
-        avatar: URL.createObjectURL(e.target.files[0]),
-      });
+      convertToBase64(e.target.files[0]).then(base64 => {
+
+        setUserInfo({
+          ...UserInfo,
+          avatar: base64 as string,
+        });
+        setItem('avatar', base64 as string)
+        toast.success('Profile updated successfully!')
+      })
+
     }
   };
   const handleChangeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserInfo({ ...UserInfo, name: e.target.value });
+    setUserInfo({ ...UserInfo, full_name: e.target.value });
   };
   const handleChangeUserEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserInfo({ ...UserInfo, email: e.target.value });
@@ -62,19 +82,23 @@ const Profile = () => {
           </div>
           <Divider />
           <div className="max-xs:block flex justify-between p-3">
-            <div className=" text-xl">User Name</div>
+            <div className=" text-xl"   >User Name</div>
             <div className="flex  items-center whitespace-nowrap ">
-              {" "}
               {isNameChanging ? (
                 <input
                   className="p-1 bg-transparent   focus:outline-slate-500 "
+
                   autoFocus
-                  value={UserInfo.name}
+                  value={UserInfo.full_name}
                   onChange={handleChangeUserName}
-                  onBlur={() => setIsnameChaning(false)}
+                  onBlur={() => {
+
+                    setIsnameChaning(false)
+                    save()
+                  }}
                 />
               ) : (
-                <div className="p-1 max-xs:w-full">{UserInfo.name}</div>
+                <div className="p-1 max-xs:w-full">{UserInfo.full_name}</div>
               )}
               &nbsp;&nbsp;
               <BiEdit
@@ -93,7 +117,10 @@ const Profile = () => {
                   autoFocus
                   value={UserInfo.email}
                   onChange={handleChangeUserEmail}
-                  onBlur={() => setIsEmailChanging(false)}
+                  onBlur={() => {
+                    setIsEmailChanging(false)
+                    save()
+                  }}
                 />
               ) : (
                 <div className="p-1  max-xs:w-full">{UserInfo.email}</div>

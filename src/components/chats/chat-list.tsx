@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { deleteChatHistory, getChatHistory } from "@/services/dispatch/chat-dispatch";
 import { useAppDispatch } from "@/store/hooks";
 import { setMessages } from "@/store/slices/chatSlice";
+import { downloadHistory } from "@/utils";
 import { Dropdown, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, DropdownTrigger, DropdownMenu, DropdownItem, Button, Listbox, ListboxItem } from "@nextui-org/react";
 import { useState } from "react";
 import { BsThreeDots,BsTrash  } from "react-icons/bs";
@@ -75,8 +76,7 @@ export default function ChatList() {
                 
                 >
                    <DropdownItem key="Archieve" onClick={() => {
-                    onOpen()
-                    selecteHistory(item.conversation_id)
+                    // onOpen()
                   }} className="   text-center "   >
                     <div className="flex w-full   items-center  pl-11   justify-start" >
                     <IoArchiveOutline className="h-4 w-4    " /> &nbsp;Archieve
@@ -84,8 +84,7 @@ export default function ChatList() {
                     </div>
                   </DropdownItem>
                   <DropdownItem key="Save" onClick={() => {
-                    onOpen()
-                    selecteHistory(item.conversation_id)
+                    downloadHistory(item.conversation_id)
                   }} className="   text-center "   >
                     <div className="flex w-full  justify-start items-center  pl-11  " >
                     <IoSaveOutline className="h-4 w-4    " /> &nbsp;Download

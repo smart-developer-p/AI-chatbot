@@ -4,7 +4,7 @@ export const getItem = (key: string) => {
 };
 
 // SET ITEM (KEY, VALUE)
-export const setItem = (key: string, value: string) => {
+export const setItem = (key: string, value: any) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 

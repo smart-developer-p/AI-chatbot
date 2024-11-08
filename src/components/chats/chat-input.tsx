@@ -17,7 +17,7 @@ import { MdDeleteOutline, MdOutlineAttachFile } from "react-icons/md";
 import { RiBook2Line } from "react-icons/ri";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CustomModal from "../customModal";
-import { AiOutlineArrowRight, AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import { AiOutlineArrowRight,  AiOutlinePlus } from "react-icons/ai";
 import { TiArrowRightOutline } from "react-icons/ti";
 
 export default function ChatInput() {
