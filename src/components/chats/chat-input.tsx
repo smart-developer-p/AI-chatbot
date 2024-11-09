@@ -11,7 +11,7 @@ import {
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, Tab, Tabs, Textarea, Tooltip } from "@nextui-org/react";
 import moment from "moment";
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
-import { BsMic } from "react-icons/bs";
+import { BsMic, BsStopFill } from "react-icons/bs";
 import { IoMdSend } from "react-icons/io";
 import { MdDeleteOutline, MdOutlineAttachFile } from "react-icons/md";
 import { RiBook2Line } from "react-icons/ri";
@@ -19,6 +19,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CustomModal from "../customModal";
 import { AiOutlineArrowRight,  AiOutlinePlus } from "react-icons/ai";
 import { TiArrowRightOutline } from "react-icons/ti";
+import { useSpeechToText } from "@/hooks/use-speech2text";
 
 export default function ChatInput() {
   const { botResponseLoading, currentTypingMessageId } = useAppSelector((state) => state.chat);
@@ -32,6 +33,10 @@ export default function ChatInput() {
 
 
   const [TooltipOpen, setTooltipOpen] = useState('')
+
+  const {  transcript, isListening, isLoading, toggleListening  }= useSpeechToText()
+
+
 
   const [form, setForm] = useState({
     query: "",
@@ -210,6 +215,11 @@ export default function ChatInput() {
     }
   };
 
+  useEffect(()=>{
+    console.log(transcript)
+    setForm((prev) => ({ ...prev, query:transcript }));
+  },[transcript])
+
   return (
     <div className="w-full px-4 pb-4">
       <div className="flex gap-1 items-end ">
@@ -219,11 +229,11 @@ export default function ChatInput() {
           className="hidden"
           onChange={handleFileSelect}
         />
-        <Button isIconOnly variant="light" onClick={() => setModalVisible(true)}>
+        <Button isIconOnly   variant="light" onClick={() => setModalVisible(true)}>
           <RiBook2Line className="h-6 w-6" />
         </Button>
-        <Button isIconOnly variant="light">
-          <BsMic className="h-6 w-6" />
+        <Button isLoading={isLoading} onClick={toggleListening} className={`${isListening?' animate-[pulse_1s_ease-in-out_infinite]  rounded-full bg-success-500  hover:bg-success-500 active:bg-success-500  ':' '}`} isIconOnly variant={isListening?undefined:"light"}>
+          {isListening?<BsStopFill  className="h-6 w-6"/>: <BsMic className="h-6 w-6" />}
         </Button>
         <div className="flex flex-grow items-end gap-1 bg-default-100 rounded-md">
 

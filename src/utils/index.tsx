@@ -33,3 +33,7 @@ export const downloadHistory = async (id: string): Promise<void> => {
     console.error('Error downloading history:', error);
   }
 };
+
+export const formatDate=(dateString: any)=> {
+  return new Date(dateString as string).toLocaleString()
+}

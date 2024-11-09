@@ -37,7 +37,7 @@ const GeneralSetting=()=>{
     <div>
       <Switch
         defaultSelected
-        color="success"
+        color="default"
         className="float-end"
       ></Switch>
     </div>
@@ -47,7 +47,17 @@ const GeneralSetting=()=>{
     <div>Language</div>
     <div>
       <Select
-        items={[{ key: "auto", label: "Auto-detect" }]}
+       items={[
+        { key: "auto", label: "Auto-detect" },
+        { key: "en", label: "English" },
+        { key: "hi", label: "Hindi" },
+        { key: "bn", label: "Bengali" },
+        { key: "gu", label: "Gujarati" },
+        { key: "ur", label: "Urdu" },
+        { key: "es", label: "Spanish" },
+        { key: "fr", label: "French" },
+        { key: "zh", label: "Chinese" },
+      ]}
         size="lg"
         placeholder="Select an theme"
         defaultSelectedKeys={["auto"]}

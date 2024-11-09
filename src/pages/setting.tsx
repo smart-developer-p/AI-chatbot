@@ -57,7 +57,7 @@ const SettingModal = () => {
         height="h-auto top-[20%]"
         onClose={() => navigate(-1)}
       >
-        <div className="px-8 pb-4 text-3xl flex justify-between">
+        <div className="px-8 pb-2 text-3xl flex justify-between">
           Settings&nbsp;
           <AiOutlineClose onClick={() => navigate(-1)} />
         </div>
@@ -87,7 +87,7 @@ const SettingModal = () => {
                   </div>
                 }
               >
-                <GeneralSetting/>
+                <GeneralSetting />
               </Tab>
 
               <Tab
@@ -100,7 +100,7 @@ const SettingModal = () => {
                   </div>
                 }
               >
-                <SecuritySetting/>
+                <SecuritySetting />
               </Tab>
               <Tab
                 key="Your_APIs"
@@ -111,13 +111,13 @@ const SettingModal = () => {
                   </div>
                 }
               >
-                <APIsetting/>
+                <APIsetting />
               </Tab>
             </Tabs>
           </div>
         </div>
       </CustomModal>
-     
+
     </div>
   );
 };
@@ -126,12 +126,12 @@ const SettingModal = () => {
 
 
 export default function Setting() {
-  
+
   return (
     <DefaultLayout>
       <div >
-      <SettingModal/>
-        </div>
+        <SettingModal />
+      </div>
     </DefaultLayout>
   );
 }
