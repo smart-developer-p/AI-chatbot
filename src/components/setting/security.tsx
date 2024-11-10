@@ -4,9 +4,9 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Tooltip,
-
+  Tooltip
 } from "@nextui-org/react";
+// import { Tooltip } from "../tootip/tooltip";
 import { Monitor, Smartphone, Laptop, Terminal, X, Info } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -71,6 +71,9 @@ const getDeviceInfo = (deviceName: string) => {
 
 const SecuritySetting = () => {
   const [devices, setDevices] = useState<Device[]>([])
+
+
+  const [infoToolTip,setInfoTooltip]=useState(0)
 
   const { setIsLoggedIn, setUser } = useAuth();
 
@@ -165,7 +168,7 @@ const SecuritySetting = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold">{deviceInfo.name}</h3>
-                <Tooltip content={
+                <Tooltip isOpen={infoToolTip===id+1} content={
                   <div className="space-y-2">
                     <p><span className="font-semibold">Type:</span> {deviceInfo.type}</p>
                     <p><span className="font-semibold">OS:</span> {deviceInfo.os}</p>
@@ -174,7 +177,8 @@ const SecuritySetting = () => {
                     <p><span className="font-semibold">Last Active:</span> {formatDate(v.last_active)}</p>
                     <p><span className="font-semibold">First Seen:</span> {formatDate(v.created_at)}</p>
                   </div>
-                }><Button variant="ghost" isIconOnly className="h-6 w-6">
+                }>
+                  <Button  onMouseLeave={()=>setInfoTooltip(0)} onMouseEnter={()=>setInfoTooltip(id+1)} variant="ghost" isIconOnly className="h-6 w-6">
                     <Info className="h-4 w-4" />
                   </Button>
                 </Tooltip>
@@ -199,6 +203,7 @@ const SecuritySetting = () => {
           : <div className="p-4 border-dashed border-2 w-full text-center dark:border-gray-200 border-gray-800 ">There is no any connected device. </div>}
       </div>
     </div>
+    
   </>
 }
 

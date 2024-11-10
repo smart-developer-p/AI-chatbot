@@ -5,3 +5,9 @@
 .markdown-content a {
   @apply text-blue-600 underline hover:text-blue-800 transition-colors duration-300;
 }
+
+.cus-modal{
+  background-color: transparent !important;
+  background: transparent !important;
+  margin: 0 !important;
+}

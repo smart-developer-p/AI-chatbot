@@ -14,7 +14,7 @@ import {
   Tabs,
 } from "@nextui-org/react";
 import {  useState } from "react";
-import { RenderCell } from "./renderApiKeyTableCell";
+import { RenderAPITableCell } from "./renderTableCell";
 import CustomModal from "../customModal";
 
 
@@ -135,7 +135,7 @@ const APIsetting = () => {
       ]}>
         {(item) => (
           <TableRow key={item.id}>
-            {(columnKey) => <TableCell>{RenderCell(item, columnKey)}</TableCell>}
+            {(columnKey) => <TableCell>{RenderAPITableCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}
       </TableBody>

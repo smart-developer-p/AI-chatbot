@@ -13,13 +13,15 @@ import moment from "moment";
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import { BsMic, BsStopFill } from "react-icons/bs";
 import { IoMdSend } from "react-icons/io";
-import { MdDeleteOutline, MdOutlineAttachFile } from "react-icons/md";
+import { MdDeleteOutline, MdOutlineAttachFile, MdUnarchive } from "react-icons/md";
 import { RiBook2Line } from "react-icons/ri";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CustomModal from "../customModal";
-import { AiOutlineArrowRight,  AiOutlinePlus } from "react-icons/ai";
+import { AiOutlineArrowRight, AiOutlinePlus } from "react-icons/ai";
 import { TiArrowRightOutline } from "react-icons/ti";
 import { useSpeechToText } from "@/hooks/use-speech2text";
+import { getItem, setItem } from "@/services/session";
+import { useArchive } from "@/hooks/use-archive";
 
 export default function ChatInput() {
   const { botResponseLoading, currentTypingMessageId } = useAppSelector((state) => state.chat);
@@ -34,7 +36,7 @@ export default function ChatInput() {
 
   const [TooltipOpen, setTooltipOpen] = useState('')
 
-  const {  transcript, isListening, isLoading, toggleListening  }= useSpeechToText()
+  const { transcript, isListening, isLoading, toggleListening } = useSpeechToText()
 
 
 
@@ -177,7 +179,11 @@ export default function ChatInput() {
     }
   ])
   const [Community_promptSearchKey, setCommunity_PromptSearchKey] = useState('')
-  const handlePromptAdd = (value:string=promptValue) => {
+
+  const  { archivedchats,setArchivedChats}=useArchive()
+
+
+  const handlePromptAdd = (value: string = promptValue) => {
     if (prompts.includes(value) || value === '') {
       setPromptValue('')
       return
@@ -193,13 +199,21 @@ export default function ChatInput() {
   }
 
   useEffect(() => {
-    const prompts = localStorage.getItem('prompts')
+    const prompts = getItem('prompts')
 
     if (prompts) {
-      setPrompts(JSON.parse(prompts))
+      setPrompts(prompts)
     }
 
   }, [])
+
+  const handleUnArchive = () => { 
+      setItem('archivedChats',archivedchats.filter(arch=>arch.id!==id))
+      setArchivedChats(archivedchats.filter(arch=>arch.id!==id))
+   }
+
+
+
 
   const handleUsePrompt = (value: string) => {
     if (value) {
@@ -215,25 +229,27 @@ export default function ChatInput() {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log(transcript)
-    setForm((prev) => ({ ...prev, query:transcript }));
-  },[transcript])
+    setForm((prev) => ({ ...prev, query: transcript }));
+  }, [transcript])
 
   return (
     <div className="w-full px-4 pb-4">
-      <div className="flex gap-1 items-end ">
+      { archivedchats.map(v=>v.id).includes(id as string)?<div className=" flex w-full justify-center" >
+        <Button className=" -mr-9" onClick={handleUnArchive} ><MdUnarchive className=" w-6 h-6 "/> Unarchive Chat</Button>
+      </div>: <div className="flex gap-1 items-end  ">
         <input
           type="file"
           ref={fileRef}
           className="hidden"
           onChange={handleFileSelect}
         />
-        <Button isIconOnly   variant="light" onClick={() => setModalVisible(true)}>
+        <Button isIconOnly variant="light" onClick={() => setModalVisible(true)}>
           <RiBook2Line className="h-6 w-6" />
         </Button>
-        <Button isLoading={isLoading} onClick={toggleListening} className={`${isListening?' animate-[pulse_1s_ease-in-out_infinite]  rounded-full bg-success-500  hover:bg-success-500 active:bg-success-500  ':' '}`} isIconOnly variant={isListening?undefined:"light"}>
-          {isListening?<BsStopFill  className="h-6 w-6"/>: <BsMic className="h-6 w-6" />}
+        <Button isLoading={isLoading} onClick={toggleListening} className={`${isListening ? ' animate-[pulse_1s_ease-in-out_infinite]  rounded-full bg-success-500  hover:bg-success-500 active:bg-success-500  ' : ' '}`} isIconOnly variant={isListening ? undefined : "light"}>
+          {isListening ? <BsStopFill className="h-6 w-6" /> : <BsMic className="h-6 w-6" />}
         </Button>
         <div className="flex flex-grow items-end gap-1 bg-default-100 rounded-md">
 
@@ -275,7 +291,7 @@ export default function ChatInput() {
         >
           <MdOutlineAttachFile className="h-6 w-6" />
         </Button>
-      </div>
+      </div>}
       <CustomModal isOpen={modalVisible} height="max-h-[450px] top-1/4" onClose={() => setModalVisible(false)} >
         <div className=" text-center">
           <h2 className="text-2xl font-bold"> Prompt Library</h2>
@@ -321,7 +337,7 @@ export default function ChatInput() {
             <Input placeholder="Input new Prompts" value={promptValue} onChange={e => setPromptValue(e.target.value)} classNames={{
               inputWrapper: 'bg-default focus:bg-default'
             }} autoFocus color="default" />
-            <Button onClick={()=>handlePromptAdd()} className="flex whitespace-nowrap bg-transparent items-center px-2 text-sm" ><AiOutlinePlus /> Add Prompts</Button>
+            <Button onClick={() => handlePromptAdd()} className="flex whitespace-nowrap bg-transparent items-center px-2 text-sm" ><AiOutlinePlus /> Add Prompts</Button>
           </div>
           <div className="flex flex-grow gap-0 rounded-md items-center mt-6">
 
@@ -374,12 +390,12 @@ export default function ChatInput() {
                       </div>
                     </div>
                     <div className=" md:block   flex gap-1 mt-2" >
-                      <Button onClick={()=>handleUsePrompt(v.content)} className="font-bold m-1 "    >
+                      <Button onClick={() => handleUsePrompt(v.content)} className="font-bold m-1 "    >
                         Use <AiOutlineArrowRight />
                       </Button>
-                       { prompts.includes(v.content)?<Button onClick={()=>handlePromptDelete(v.content)} className="font-bold m-1">
-                        Added 
-                       </Button>:<Button onClick={()=>handlePromptAdd(v.content)} className="font-bold m-1">
+                      {prompts.includes(v.content) ? <Button onClick={() => handlePromptDelete(v.content)} className="font-bold m-1">
+                        Added
+                      </Button> : <Button onClick={() => handlePromptAdd(v.content)} className="font-bold m-1">
                         Add <AiOutlinePlus />
                       </Button>}
                     </div>

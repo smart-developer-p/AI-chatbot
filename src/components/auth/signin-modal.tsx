@@ -14,7 +14,7 @@ import {
   Tabs,
 } from "@nextui-org/react";
 import { useFormik } from "formik";
-import {  useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { IoCheckmarkOutline, IoCloseOutline } from "react-icons/io5";
 import * as Yup from "yup";
@@ -66,7 +66,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
     }),
   };
 
-  const handleResendVerification = async (email:string=unverifiedEmail||'') => {
+  const handleResendVerification = async (email: string = unverifiedEmail || '') => {
     if (!email) return;
 
     setResendingEmail(true);
@@ -157,7 +157,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
     enableReinitialize: true,
     onSubmit: async (values) => {
       setLoading(true);
-      
+
       setError(null);
 
       try {
@@ -177,7 +177,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
             throw new Error("Invalid response format");
           }
         } else {
-           await register(values);
+          await register(values);
           setLoading(false);
           setShowVerificationModal(true);
           onSignupSuccess("Registration successful! Please verify your email.");
@@ -222,102 +222,105 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
         isOpen={isOpen}
 
         hideCloseButton
-        className="backdrop-blur-sm"
+        backdrop='transparent'
+       
       >
-        <ModalContent>
-          <ModalHeader>
-            <Tabs
-              fullWidth
-              aria-label="Options"
-              selectedKey={selectedKey}
-              onSelectionChange={(key)=>{
-                setSelectedKey(key as string )
-                setPassword('')
-              }  }
-              color="primary"
-              radius="lg"
-              size="lg"
-            >
-              <Tab key="login" title="Login" className="text-lg py-6" />
-              <Tab key="signup" title="Sign Up" className="text-lg py-6" />
-            </Tabs>
-          </ModalHeader>
-          <ModalBody>
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-              {selectedKey === "signup" && (
-                <Input
-                  placeholder="Full Name"
-                  size="lg"
-                  type="text"
-                  {...getFieldProps("full_name")}
-                  isInvalid={touched.full_name && errors.full_name ? true : false}
-                  errorMessage={errors.full_name}
-                />
-              )}
-              <Input
-                placeholder="Email"
-                size="lg"
-                type="email"
-                {...getFieldProps("email")}
-                isInvalid={touched.email && errors.email ? true : false}
-                errorMessage={errors.email}
-              />
-              <Input
-                placeholder="Password"
-                size="lg"
-                type="password"
-                {...getFieldProps("password")}
-                onChange={e => {
-                  getFieldProps("password").onChange(e)
-                  setPassword(e.target.value)
+        <ModalContent className="cus-modal" style={{ position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, maxWidth: "100%",  }}>
+          <ModalContent className="" >
+            <ModalHeader>
+              <Tabs
+                fullWidth
+                aria-label="Options"
+                selectedKey={selectedKey}
+                onSelectionChange={(key) => {
+                  setSelectedKey(key as string)
+                  setPassword('')
                 }}
-                isInvalid={touched.password && errors.password ? true : false}
-                errorMessage={errors.password}
-              />
-              
-              {selectedKey === 'signup' && <div className=" px-2" >
-                <div className="w-full flex justify-between" >
-                  <div className=" text-warning-500" >Weak</div>
-                  <div className=" text-success-500" >Strong</div>
-                </div>
-                <Progress
-                  size="sm"
-                  radius="sm"
-                  classNames={{
-                    base: "max-w-md",
-                    track: "drop-shadow-md border border-default",
-                    indicator: "bg-gradient-to-r from-yellow-500 via-orange-500 to-green-500",
-                    label: "tracking-wider font-medium text-default-600",
-                    value: "text-foreground/60",
-                  }}
-                  value={strongPassword()}
-                />
-                <div className={`flex items-center text-sm ${hasLetter() ? 'text-success-500' : 'text-danger-500'} `} >{hasLetter() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain at least one letter (lower or upper case)</div>
-                <div className={`flex items-center text-sm ${hasNumber() ? 'text-success-500' : 'text-danger-500'} `} >{hasNumber() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain at least one number</div>
-                <div className={`flex items-center text-sm ${hasMinimumLength() ? 'text-success-500' : 'text-danger-500'} `} >{hasMinimumLength() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain a minimum of 8 characters</div>
-
-              </div>}
-              {error && (
-                <p className="text-danger text-sm font-medium px-2">{error}</p>
-              )}
-
-
-
-              {unverifiedEmail && (
-                <Button
+                color="primary"
+                radius="lg"
+                size="lg"
+              >
+                <Tab key="login" title="Login" className="text-lg py-6" />
+                <Tab key="signup" title="Sign Up" className="text-lg py-6" />
+              </Tabs>
+            </ModalHeader>
+            <ModalBody>
+              <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+                {selectedKey === "signup" && (
+                  <Input
+                    placeholder="Full Name"
+                    size="lg"
+                    type="text"
+                    {...getFieldProps("full_name")}
+                    isInvalid={touched.full_name && errors.full_name ? true : false}
+                    errorMessage={errors.full_name}
+                  />
+                )}
+                <Input
+                  placeholder="Email"
                   size="lg"
-                  color="secondary"
-                  onClick={()=> handleResendVerification()}
-                  isLoading={resendingEmail}
-                >
-                  Resend Verification Email
+                  type="email"
+                  {...getFieldProps("email")}
+                  isInvalid={touched.email && errors.email ? true : false}
+                  errorMessage={errors.email}
+                />
+                <Input
+                  placeholder="Password"
+                  size="lg"
+                  type="password"
+                  {...getFieldProps("password")}
+                  onChange={e => {
+                    getFieldProps("password").onChange(e)
+                    setPassword(e.target.value)
+                  }}
+                  isInvalid={touched.password && errors.password ? true : false}
+                  errorMessage={errors.password}
+                />
+
+                {selectedKey === 'signup' && <div className=" px-2" >
+                  <div className="w-full flex justify-between" >
+                    <div className=" text-warning-500" >Weak</div>
+                    <div className=" text-success-500" >Strong</div>
+                  </div>
+                  <Progress
+                    size="sm"
+                    radius="sm"
+                    classNames={{
+                      base: "max-w-md",
+                      track: "drop-shadow-md border border-default",
+                      indicator: "bg-gradient-to-r from-yellow-500 via-orange-500 to-green-500",
+                      label: "tracking-wider font-medium text-default-600",
+                      value: "text-foreground/60",
+                    }}
+                    value={strongPassword()}
+                  />
+                  <div className={`flex items-center text-sm ${hasLetter() ? 'text-success-500' : 'text-danger-500'} `} >{hasLetter() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain at least one letter (lower or upper case)</div>
+                  <div className={`flex items-center text-sm ${hasNumber() ? 'text-success-500' : 'text-danger-500'} `} >{hasNumber() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain at least one number</div>
+                  <div className={`flex items-center text-sm ${hasMinimumLength() ? 'text-success-500' : 'text-danger-500'} `} >{hasMinimumLength() ? <IoCheckmarkOutline /> : <IoCloseOutline />}&nbsp;Must contain a minimum of 8 characters</div>
+
+                </div>}
+                {error && (
+                  <p className="text-danger text-sm font-medium px-2">{error}</p>
+                )}
+
+
+
+                {unverifiedEmail && (
+                  <Button
+                    size="lg"
+                    color="secondary"
+                    onClick={() => handleResendVerification()}
+                    isLoading={resendingEmail}
+                  >
+                    Resend Verification Email
+                  </Button>
+                )}
+                <Button size="lg" color="primary" type="submit" isLoading={loading}>
+                  {selectedKey === "login" ? "Let's Go" : "Join Now"}
                 </Button>
-              )}
-              <Button size="lg" color="primary" type="submit" isLoading={loading}>
-                {selectedKey === "login" ? "Let's Go" : "Join Now"}
-              </Button>
-            </form>
-          </ModalBody>
+              </form>
+            </ModalBody>
+          </ModalContent>
         </ModalContent>
       </Modal>
 
@@ -328,7 +331,7 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
           // onClose={() => setShowVerificationModal(false)}
           className="backdrop-blur-xl"
           size="lg"
-          // onClose={() => setShowVerificationModal(false)}
+        // onClose={() => setShowVerificationModal(false)}
         >
           <ModalContent className="w-[80%] mx-auto p-8 rounded-lg shadow-lg">
             <ModalHeader>
@@ -341,13 +344,13 @@ export default function SigninModal({ isOpen, onClose, onSignupSuccess }: P) {
               <div className="w-full max-sm:block flex justify-between " >
 
 
-              <Button size="lg" color="warning" className="w-1/3 max-sm:w-full m-1" onClick={()=>handleResendVerification(formik.values['email'])}>
-                Resend 
-              </Button>
-              <Button size="lg" color="primary" className="w-1/3 max-sm:w-full m-1" onClick={() => window.open("https://mail.google.com", "_blank")}>
-                Open Email
-              </Button>
-             
+                <Button size="lg" color="warning" className="w-1/3 max-sm:w-full m-1" onClick={() => handleResendVerification(formik.values['email'])}>
+                  Resend
+                </Button>
+                <Button size="lg" color="primary" className="w-1/3 max-sm:w-full m-1" onClick={() => window.open("https://mail.google.com", "_blank")}>
+                  Open Email
+                </Button>
+
               </div>
             </ModalFooter>
           </ModalContent>

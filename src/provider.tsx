@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { Provider as StoreProvider } from "react-redux";
 import { store } from "./store";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ArchiveProvider } from "./contexts/ArchiveContext";
 
 const queryClient = new QueryClient();
 export function Provider({ children }: { children: React.ReactNode }) {
@@ -15,7 +16,10 @@ export function Provider({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <StoreProvider store={store}>
           <QueryClientProvider client={queryClient}>
+            <ArchiveProvider>
+
             {children}
+            </ArchiveProvider>
           </QueryClientProvider>
         </StoreProvider>
       </AuthProvider>

@@ -2,7 +2,7 @@ import { ReactNode, createContext, useEffect, useState } from "react";
 
 import { getItem } from "../services/session";
 
-export interface User {
+interface User {
   email: string;
   full_name: string;
   username: string;
